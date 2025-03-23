@@ -1,0 +1,11 @@
+/*.o
+/*.map
+/*.sym
+/*.pyc
+/*.pyo
+/*.prg
+/*.lst
+/uart.sock
+/dump.mem
+/serial.raw
+/test
