@@ -1,0 +1,454 @@
+; MEGA65 and Xemu opcode/cycle meassure/test tool.
+;
+; Copyright (C)2025 LGB (Gábor Lénárt) <lgblgblgb@gmail.com>
+;
+; This program is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 3 of the License, or
+; (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+.SETCPU "4510"
+
+.SEGMENT "ZEROPAGE"
+
+result_ptr:		.RES 4
+source_ptr:		.RES 2
+test_zp4:		.RES 4	; 4 bytes -> for opcode testing, if opcode needs some ZP locs
+secondary_correction:	.RES 1
+last_cycle_result:	.RES 1
+wait_for_this_frame:	.RES 1
+loop_counter:		.RES 2
+
+.SEGMENT "LOADADDR"
+
+.IMPORT __BASICSTUB_LOAD__
+.WORD	__BASICSTUB_LOAD__
+
+.SEGMENT "BASICSTUB"
+
+.SCOPE
+	.WORD @nextline, 2025
+	.WORD $02FE     ; "BANK" BASIC10/65 token (double byte token!)
+	.BYTE "0:"
+	.BYTE $9E ; "SYS" basic token
+	.BYTE $30+.LOBYTE(main/10000)
+	.BYTE $30+.LOBYTE((main .MOD 10000)/1000)
+	.BYTE $30+.LOBYTE((main .MOD 1000)/100)
+	.BYTE $30+.LOBYTE((main .MOD 100)/10)
+	.BYTE $30+.LOBYTE( main .MOD 10)
+	.BYTE 0
+@nextline:
+	.WORD @lastline, 2026
+	.BYTE $99, $20
+	.BYTE $38, $31, $30, $30, $30, $30, $AD, $28
+	.BYTE $C2, $28, $32, $35, $31, $29, $AA, $32, $35, $36, $AC, $C2, $28, $32, $35, $32, $29
+	.BYTE $29
+	.BYTE $00
+@lastline:
+	.WORD 0,0
+	.BYTE 0
+.ENDSCOPE
+
+
+.SEGMENT "CODE"
+
+
+
+
+FRAME_COUNTER_REG = $D7FA
+IRQ_VECTOR = $FFFE
+NMI_VECTOR = $FFFA
+
+TOTAL_CPU_CYCLES_PER_FRAME = 810000
+
+; These must be 256-byte page aligned values!
+TEST_AREA	= $F000
+TEMP_ZP		= $FE00
+TEMP_STACK	= $E000
+
+
+
+; -----------------------------------------------------------------------------------------------------
+; INPUT:
+; 	TEST_AREA must be initialized with payload to test (can be not initalization for empty payload)
+; 	X = must contain the size of the payload (can be zero for empty payload)
+; OUTPUT:
+;	A = clock cycles used
+; NOTE:
+;	will mangle the IRQ vector (for BRK testing). IRQ must be disabled anyway
+; -----------------------------------------------------------------------------------------------------
+.PROC	run_test
+	; Backup registers (other than A which will be used to return result)
+	PHX
+	PHY
+	PHZ
+	; Save X (aka test payload size) - also part of self-mod code
+	STX	payload_size
+	; Adjust the conditional jump inside test_loop_tail at test_loop_tail_beq
+	TXA
+	NEG
+	SEC
+	SBC	#test_loop_tail_beq - test_loop_tail + 1
+	STA	test_loop_tail_beq		; fix the test loop's branch target before copying the loop tail
+	; Write out the tail of the test loop
+	LDY	#0
+:	LDA	test_loop_tail,Y
+	STA	TEST_AREA,X
+	INX
+	INY
+	CPY	#test_loop_tail_size
+	BNE	:-
+	; Reset the test loop counter
+	LDA	#0
+	STA	loop_counter
+	STA	loop_counter+1
+	; Use temporary stack (also backing up stack pointer) - we want to test stack ops as well!
+	TSX
+	STX	stack_pointer
+	LDY	#.HIBYTE(TEMP_STACK)
+	TYS
+	; Set up IRQ vector, we want to test BRK as well
+	payload_size = * + 1
+	LDA	#0				; will be set to the input X parameter (IRQ by BRK will be at the loop-tail)
+	STA	IRQ_VECTOR
+	LDA	#.HIBYTE(TEST_AREA)
+	STA	IRQ_VECTOR+1
+	; Disable screen (to give less chance video generation to stop the CPU for whatever reason like bad lines?!)
+	LDA	#16
+	TRB	$D011
+	; Well ... why not ...
+	INC	$D020
+	; Finally ...
+	LDX	FRAME_COUNTER_REG
+	INX
+	STX	wait_for_this_frame
+:	CPX	FRAME_COUNTER_REG		; wait for the next frame to begin
+	BNE	:-
+	JMP	TEST_AREA			; give control to the test loop now!
+run_test_return:				; test loop will jump back here (note: we can't use stack with JSR/RTS as we want to test task ops as well!)
+	; Enable screen
+	LDA	#16
+	TSB	$D011
+	; Restore stack and stack pointer
+	LDY	#1
+	TYS
+	stack_pointer = * + 1
+	LDX	#0
+	TXS
+	; Now, we should calculate things from the counter (loop_counter) ...
+	; TOTAL_CPU_CYCLES_PER_FRAME / loop_counter = cycle count [including the cycles spent from test_loop_tail ...]
+	; Utilize MEGA65's hardware divisor unit for this dounting task
+	DIVIDEND_REG = $D770
+	DIVISOR_REG  = $D774
+	LDA	#TOTAL_CPU_CYCLES_PER_FRAME & $FF
+	STA	DIVIDEND_REG+0
+	LDA	#(TOTAL_CPU_CYCLES_PER_FRAME >>  8) & $FF
+	STA	DIVIDEND_REG+1
+	LDA	#(TOTAL_CPU_CYCLES_PER_FRAME >> 16) & $FF
+	STA	DIVIDEND_REG+2
+	LDA	#(TOTAL_CPU_CYCLES_PER_FRAME >> 24) & $FF
+	STA	DIVIDEND_REG+3
+	LDA	loop_counter
+	STA	DIVISOR_REG+0
+	LDA	loop_counter+1
+	STA	DIVISOR_REG+1
+	LDA	#0
+	STA	DIVISOR_REG+2
+	STA	DIVISOR_REG+3
+:	LDA	$D70F		; waiting for hardware divisor to become ready
+	BMI	:-
+	; What the hw divisor does (roughly speaking) a 64 bit div based on 32 bit inputs though:  (DIVIDEND << 32) / DIVISOR
+	DIVIDE_RES = $D768
+	LDA	DIVIDE_RES + 4	; "integer part"
+	BIT	DIVIDE_RES + 3	; test bit 7 or the MSB of the remainder (if set, integer part must be rounded upwards)
+	BPL	:+
+	INA			; round result upwards (fract part >= 0.5)
+:	LDX	payload_size	; this is only used here to get to know if payload size was zero (ie, calibration run)
+	BEQ	do_calibrate
+	; Final result: we subtract the correction factor (must be calibrated initially by calling tester with empty payload)
+	SEC
+	correction_factor = * + 1
+	SBC	#0
+	; Also substract "secondary correction" - it's used in some tests when we need to combine more opcodes wih two tests
+	SEC
+	SBC	secondary_correction
+	LDX	#0
+	STX	secondary_correction	; restore secondary_correction back to zero - it's valid only for a single run
+soon_over:
+	; FIXME REMOVE THIS:
+	PHA
+	CLC
+	ADC	#'0'
+	STA	2048
+	PLA
+	; FIXME: end of remove this
+	; Ok, now the final result in A, huh ...
+	; About to return!
+	STA	last_cycle_result	; not used here, but test_suite runner uses it
+	PLZ
+	PLY
+	PLX
+	RTS
+do_calibrate:
+	STA	correction_factor	; store value as the correction factor for following non-caliration runs (payload_size!=0)
+	BRA	soon_over
+	; --------------------------------------------------------------------------------
+	; !warning this code here will be relocated!! addresses could be messed up easily!
+	;                      !do not jump to this code directly!
+	; --------------------------------------------------------------------------------
+test_loop_tail:
+	INW	loop_counter	; the idea here that 16 bit should be enough for even an empty loop tested for a video frame
+	LDA	wait_for_this_frame
+	CMP	FRAME_COUNTER_REG
+	test_loop_tail_beq = * + 1
+	BEQ	test_loop_tail	; this must be adjusted by the code!
+	JMP	run_test_return
+	test_loop_tail_size = * - test_loop_tail
+.ENDPROC
+
+
+.SEGMENT "INIT"
+
+
+.PROC	main
+	; Disable interrupts
+	SEI
+	; Make sure we have 40.5MHz clock, force it
+	LDA	#65
+	STA	0
+	; We want MEGA65 I/O personality
+	LDA	#$47
+	STA	$D02F
+	LDA	#$53
+	STA	$D02F
+	; Pure cosmetic ;)
+	LDA	$D020
+	STA	restore_d020
+	LDA	$D021
+	STA	restore_d021
+	; Make sure we're in PAL mode
+	LDA	#0
+	STA	$D06F
+	STA	$D072
+	LDA	#$68
+	STA	$D048
+	LDA	#$0F
+	TRB	$D049
+	LDA	#$F8
+	STA	$D04A
+	LDA	#$0F
+	TRB	$D04B
+	LDA	#$68
+	STA	$D04E
+	LDA	#$0F
+	TRB	$D04F
+	LDA	#0
+	STA	$D072
+	LDA	#$80
+	TSB	$DC0E
+	TSB	$DD0E
+	; wait some time to be sure
+	LDA	FRAME_COUNTER_REG
+	INA
+	INA
+	INA
+	INA
+:	CMP	FRAME_COUNTER_REG
+	BNE	:-
+	; Save banking info
+	LDA	$D030
+	STA	restore_d030
+	LDA	1
+	STA	restore_1
+	; Dearming MAPs
+	LDA	#0
+	TAX
+	TAY
+	TAZ
+	MAP
+	EOM
+	; Set our banking
+	LDA	#0
+	STA	$D030
+	LDA	#$35
+	STA	1
+	; Setting up NMI handler for emergency stop (someone tapped RESTORE?!) - it would bothers the testing!!
+	LDA	#.LOBYTE(nmi_handler)
+	STA	NMI_VECTOR
+	LDA	#.HIBYTE(nmi_handler)
+	STA	NMI_VECTOR+1
+	; Use our own zero page not at address zero ;)
+	; *** DO NOT USE OUR ZP DEFINED LOCS BEFORE THIS ***
+	LDA	#.HIBYTE(TEMP_ZP)
+	TAB
+	; Now run the the full test suite
+	JSR	run_test_suite
+	; Restore the normal zero page
+	; *** DO NOT USE OUR ZP DEFINED LOCS AFTER THIS ***
+	LDA	#0
+	TAB
+	; Restore banking
+	restore_d030 = * + 1
+	LDA	#0
+	STA	$D030
+	restore_1 = * + 1
+	LDA	#0
+	STA	1
+	; Pure cosmetic
+	restore_d020 = * + 1
+	LDA	#0
+	STA	$D020
+	restore_d021 = * + 1
+	LDA	#0
+	STA	$D021
+	; ---
+	LDZ	#0	; some ROMs may not "like" is Z register is not set to zero
+	RTS	; returns to BASIC - don't enable interrupts or will crash (so MEGA65 ROM has chance to set up its MAPpings and then enable interrupts again!)
+.ENDPROC
+
+
+.SEGMENT "CODE"
+
+
+.PROC	nmi_handler
+:	INC	$D020
+	INC	$D021
+	BRA	:-
+.ENDPROC
+
+
+.PROC	get_test_byte
+	LDZ	#0
+	LDA	(source_ptr),Z
+	INW	source_ptr
+	RTS
+.ENDPROC
+
+
+.PROC	store_test_result
+	LDZ	#0
+	NOP
+	STA	(result_ptr),Z
+	INW	result_ptr
+	; TODO: also send to the "hyperserial" port
+	RTS
+.ENDPROC
+
+
+.PROC	run_test_suite
+	; Result in attic-RAM (skip the two first bytes though, it will be filled at the end)
+	LDA	#2
+	STA	result_ptr+0
+	LDA	#0
+	STA	result_ptr+1
+	STA	result_ptr+2
+	LDA	#$8
+	STA	result_ptr+3
+	; The test "stream"
+	LDA	#.LOBYTE(test_suite)
+	STA	source_ptr
+	LDA	#.HIBYTE(test_suite)
+	STA	source_ptr+1
+	; Make sure to have zero secondary correction!
+	LDA	#0
+	STA	secondary_correction
+	; Calibration phase! Must be the first call of run_test
+	LDX	#0
+	JSR	run_test
+	JSR	store_test_result
+	; Now walking over the test suite and storing the result ...
+test_loop:
+	INC	$D021	; why not.
+	JSR	get_test_byte		; get test payload length
+	TAY
+	BEQ	we_are_so_done		; payload=0 -> end of test suite
+	JSR	get_test_byte		; get test-id low byte (or spec routine addr, if len > 127)
+	STA	current_test_id
+	JSR	get_test_byte		; get test-id hi byte  (--- "" ---)
+	STA	current_test_id+1
+	TYA
+	BMI	special_call		; payload>=128 -> special prepare call needed for test, current_test_id word is routine address
+	; Copy code (Y still has the number of bytes we need)
+	LDX	#0
+:	JSR	get_test_byte
+	STA	TEST_AREA,X
+	INX
+	DEY
+	BNE	:-
+	; Run the opcode tester! X now contains the required payload size info
+	JSR	run_test
+	; Store the result: cycles (run_test returns that in A), then the test_id
+	JSR	store_test_result
+	LDA	current_test_id
+	JSR	store_test_result
+	LDA	current_test_id+1
+	JSR	store_test_result
+	; Continue with the next test
+	BRA	test_loop
+we_are_so_done:
+	; Put the size of result memory area at the very first two bytes of attic-RAM
+	LDX	result_ptr
+	LDY	result_ptr+1
+	LDA	#0
+	STA	result_ptr
+	STA	result_ptr+1
+	TAZ
+	TXA
+	NOP
+	STA	(result_ptr),Z
+	INZ
+	TYA
+	NOP
+	STA	(result_ptr),Z
+	RTS	; end of test suite!!!!!
+special_call:
+	current_test_id = * + 1
+	JSR	$FFFF
+	BRA	test_loop
+.ENDPROC
+
+
+
+.MACRO	CALL	n
+	.BYTE	$FF
+	.WORD	n
+.ENDMACRO
+.MACRO	TESTING	testid,bytelen
+	.BYTE	bytelen
+	.WORD	testid
+.ENDMAC
+
+.PROC	do_secondary_correction
+	LDA	last_cycle_result
+	STA	secondary_correction
+	RTS
+.ENDPROC
+
+
+.SEGMENT "TEST"
+
+test_suite:
+; --- 00 BRK
+	TESTING $00, 1	; define test, test-id is $00, 1 = number of bytes
+	.BYTE	0	; n BYTES: the tested opcode bytes, here: opcode BRK
+; --- 4C JMP
+	TESTING $4C, 3
+	JMP	TEST_AREA+3
+; --- E3 INW
+	TESTING	$E3, 2
+	INW	Z:test_zp4
+; --- EA NOP
+;	TESTING $EA, 1
+;	NOP
+; --- END ----
+	.BYTE	0	; end of tests. Do not remove this!
+
+.SEGMENT "BSS"
