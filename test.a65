@@ -34,39 +34,51 @@ loop_counter:		.RES 2
 
 .SEGMENT "BASICSTUB"
 
+; Use plain ASCII character encoding (define 1:1 mapping)
+.REPEAT 256, I
+.CHARMAP I, I
+.ENDREP
+
 .SCOPE
-	.WORD @nextline, 2025
-	.WORD $02FE     ; "BANK" BASIC10/65 token (double byte token!)
-	.BYTE "0:"
-	.BYTE $9E ; "SYS" basic token
-	.BYTE $30+.LOBYTE(main/10000)
-	.BYTE $30+.LOBYTE((main .MOD 10000)/1000)
-	.BYTE $30+.LOBYTE((main .MOD 1000)/100)
-	.BYTE $30+.LOBYTE((main .MOD 100)/10)
-	.BYTE $30+.LOBYTE( main .MOD 10)
-	.BYTE 0
-@nextline:
-	.WORD @lastline, 2026
-	.BYTE $99, $20
-	.BYTE $38, $31, $30, $30, $30, $30, $AD, $28
-	.BYTE $C2, $28, $32, $35, $31, $29, $AA, $32, $35, $36, $AC, $C2, $28, $32, $35, $32, $29
-	.BYTE $29
-	.BYTE $00
-@lastline:
-	.WORD 0,0
-	.BYTE 0
+	.WORD	nextline, 2025
+	.WORD	$02FE     ; "BANK" BASIC10/65 token (double byte token!)
+	.BYTE	" 0 : "
+	.BYTE	$9E ; "SYS" basic token
+	.BYTE	" "
+	.BYTE	$30 + .LOBYTE((run .MOD 10000)/1000)
+	.BYTE	$30 + .LOBYTE((run .MOD  1000)/ 100)
+	.BYTE	$30 + .LOBYTE((run .MOD   100)/  10)
+	.BYTE	$30 + .LOBYTE( run .MOD    10)
+	.BYTE	0
+nextline:
+	.WORD	lastline, 2026
+	.WORD	$10FE	; "BSAVE" basic token
+	.BYTE	$22,"@RESULT,S",$22,", P($8000000) "
+	.BYTE	$A4	; "TO" basic token
+	.BYTE	" P($8000000"
+	.BYTE	$AA	; '+'
+	.WORD	$10CE	; "WPEEK"
+	.BYTE	"($8000000)"
+	.BYTE	$AB	; '-'
+	;.BYTE	"1), R, U8"
+	.BYTE	"1), U8"
+	.BYTE	$00
+lastline:
+	.WORD	0,0
+	.BYTE	0
+run:
+	JMP	main
 .ENDSCOPE
 
 
 .SEGMENT "CODE"
 
 
-
-
 FRAME_COUNTER_REG = $D7FA
 IRQ_VECTOR = $FFFE
 NMI_VECTOR = $FFFA
 
+; 40.5MHz/50 frames = 40500000/50 = 810000
 TOTAL_CPU_CYCLES_PER_FRAME = 810000
 
 ; These must be 256-byte page aligned values!
@@ -81,9 +93,10 @@ TEMP_STACK	= $E000
 ; 	TEST_AREA must be initialized with payload to test (can be not initalization for empty payload)
 ; 	X = must contain the size of the payload (can be zero for empty payload)
 ; OUTPUT:
-;	A = clock cycles used
-; NOTE:
-;	will mangle the IRQ vector (for BRK testing). IRQ must be disabled anyway
+;	A = clock cycles used (if after calibration, only the payload we want to measure!)
+; NOTES:
+;	* will mangle the IRQ vector (for BRK testing). IRQ must be disabled anyway during the tests!
+;       * opcodes messing up PC must be compesed in a way to jump to the opcode after the payload
 ; -----------------------------------------------------------------------------------------------------
 .PROC	run_test
 	; Backup registers (other than A which will be used to return result)
@@ -138,6 +151,7 @@ run_test_return:				; test loop will jump back here (note: we can't use stack wi
 	LDA	#16
 	TSB	$D011
 	; Restore stack and stack pointer
+	SEE					; set 8 bit stack (if payload tested CLE before?)
 	LDY	#1
 	TYS
 	stack_pointer = * + 1
@@ -183,16 +197,8 @@ run_test_return:				; test loop will jump back here (note: we can't use stack wi
 	LDX	#0
 	STX	secondary_correction	; restore secondary_correction back to zero - it's valid only for a single run
 soon_over:
-	; FIXME REMOVE THIS:
-	PHA
-	CLC
-	ADC	#'0'
-	STA	2048
-	PLA
-	; FIXME: end of remove this
 	; Ok, now the final result in A, huh ...
 	; About to return!
-	STA	last_cycle_result	; not used here, but test_suite runner uses it
 	PLZ
 	PLY
 	PLX
@@ -234,27 +240,6 @@ test_loop_tail:
 	STA	restore_d020
 	LDA	$D021
 	STA	restore_d021
-	; Make sure we're in PAL mode
-	LDA	#0
-	STA	$D06F
-	STA	$D072
-	LDA	#$68
-	STA	$D048
-	LDA	#$0F
-	TRB	$D049
-	LDA	#$F8
-	STA	$D04A
-	LDA	#$0F
-	TRB	$D04B
-	LDA	#$68
-	STA	$D04E
-	LDA	#$0F
-	TRB	$D04F
-	LDA	#0
-	STA	$D072
-	LDA	#$80
-	TSB	$DC0E
-	TSB	$DD0E
 	; wait some time to be sure
 	LDA	FRAME_COUNTER_REG
 	INA
@@ -285,6 +270,27 @@ test_loop_tail:
 	STA	NMI_VECTOR
 	LDA	#.HIBYTE(nmi_handler)
 	STA	NMI_VECTOR+1
+	; Make sure we're in PAL mode
+	LDA	#0
+	STA	$D06F
+	STA	$D072
+	LDA	#$68
+	STA	$D048
+	LDA	#$0F
+	TRB	$D049
+	LDA	#$F8
+	STA	$D04A
+	LDA	#$0F
+	TRB	$D04B
+	LDA	#$68
+	STA	$D04E
+	LDA	#$0F
+	TRB	$D04F
+	LDA	#0
+	STA	$D072
+	LDA	#$80
+	TSB	$DC0E
+	TSB	$DD0E
 	; Use our own zero page not at address zero ;)
 	; *** DO NOT USE OUR ZP DEFINED LOCS BEFORE THIS ***
 	LDA	#.HIBYTE(TEMP_ZP)
@@ -338,20 +344,32 @@ test_loop_tail:
 	NOP
 	STA	(result_ptr),Z
 	INW	result_ptr
-	; TODO: also send to the "hyperserial" port
+	; TODO: also send to the "hyperserial" port - not used currently
 	RTS
+.ENDPROC
+
+
+.PROC	store_id
+	LDA	#'M'
+	JSR	store_test_result
+	LDA	#'6'
+	JSR	store_test_result
+	LDA	#'5'
+	JMP	store_test_result
 .ENDPROC
 
 
 .PROC	run_test_suite
 	; Result in attic-RAM (skip the two first bytes though, it will be filled at the end)
-	LDA	#2
+	LDA	#2			; first two bytes will be used to store the size of the result
 	STA	result_ptr+0
 	LDA	#0
 	STA	result_ptr+1
 	STA	result_ptr+2
 	LDA	#$8
 	STA	result_ptr+3
+	; Test result identifier (3 bytes)
+	JSR	store_id
 	; The test "stream"
 	LDA	#.LOBYTE(test_suite)
 	STA	source_ptr
@@ -386,6 +404,7 @@ test_loop:
 	; Run the opcode tester! X now contains the required payload size info
 	JSR	run_test
 	; Store the result: cycles (run_test returns that in A), then the test_id
+	STA	last_cycle_result	; used by some CALL macros later in the test-suite
 	JSR	store_test_result
 	LDA	current_test_id
 	JSR	store_test_result
@@ -394,20 +413,19 @@ test_loop:
 	; Continue with the next test
 	BRA	test_loop
 we_are_so_done:
+	LDA	#$FF
+	JSR	store_test_result
+	JSR	store_id
 	; Put the size of result memory area at the very first two bytes of attic-RAM
 	LDX	result_ptr
 	LDY	result_ptr+1
-	LDA	#0
-	STA	result_ptr
-	STA	result_ptr+1
-	TAZ
+	LDZ	#0
+	STZ	result_ptr
+	STZ	result_ptr+1
 	TXA
-	NOP
-	STA	(result_ptr),Z
-	INZ
+	JSR	store_test_result
 	TYA
-	NOP
-	STA	(result_ptr),Z
+	JSR	store_test_result
 	RTS	; end of test suite!!!!!
 special_call:
 	current_test_id = * + 1
@@ -415,6 +433,10 @@ special_call:
 	BRA	test_loop
 .ENDPROC
 
+
+.SEGMENT "BSS"
+
+.SEGMENT "TEST"
 
 
 .MACRO	CALL	n
@@ -432,9 +454,6 @@ special_call:
 	RTS
 .ENDPROC
 
-
-.SEGMENT "TEST"
-
 test_suite:
 ; --- 00 BRK
 	TESTING $00, 1	; define test, test-id is $00, 1 = number of bytes
@@ -450,5 +469,3 @@ test_suite:
 ;	NOP
 ; --- END ----
 	.BYTE	0	; end of tests. Do not remove this!
-
-.SEGMENT "BSS"
