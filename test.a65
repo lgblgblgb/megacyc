@@ -455,17 +455,19 @@ special_call:
 .ENDPROC
 
 test_suite:
-; --- 00 BRK
+; IMPORTANT: Do not modify/remove comments "; --- " (unless for new tests / fixes) as those are parsed by the python script to present the result with opcodes!
+; --- BEGIN TEST
+; -------------  00 BRK
 	TESTING $00, 1	; define test, test-id is $00, 1 = number of bytes
 	.BYTE	0	; n BYTES: the tested opcode bytes, here: opcode BRK
-; --- 4C JMP
+; -------------  4C JMP
 	TESTING $4C, 3
 	JMP	TEST_AREA+3
-; --- E3 INW
+; ---            E3 INW $nn
 	TESTING	$E3, 2
 	INW	Z:test_zp4
 ; --- EA NOP
 ;	TESTING $EA, 1
 ;	NOP
-; --- END ----
+; --- END TEST
 	.BYTE	0	; end of tests. Do not remove this!
