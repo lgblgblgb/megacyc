@@ -16,18 +16,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CL65	= cl65
+XEMU	= xemu-xmega65
+M65ETHL	= mega65_etherload
+M65FTP  = mega65_ftp
+C1541	= c1541
+
 SRC	= test.a65
 PRG	= test
 OBJ	= test.o
 LST	= test.lst
 MAP	= test.map
 LINKCFG	= linker.ld
-XEMU	= xemu-xmega65
-M65ETHL	= mega65_etherload
-M65FTP  = mega65_ftp
 DEPENDS	= Makefile
-
-C1541	= c1541
 
 XDISK	= result/XEMUDISK.D81
 MDISK	= result/OPCYCLES.D81
@@ -56,6 +56,11 @@ mega65:	$(PRG)
 
 $(MDISK):
 	rm -f "$(MDISK)"
+	$(MAKE) mega65
+	@echo
+	@echo "*** MAKE SURE MEGA65 FINISHED THE TESTING (YOU'LL SEE THE DIRECTORY LISTING) ***"
+	@echo "*** THEN - AND ONLY THEN - PRESS ENTER HERE (NOT ON YOUR MEGA65) ***"
+	@read something
 	$(M65FTP) -e -c "get `basename $(MDISK)` $(MDISK)" -c "exit"
 	test -s "$(MDISK)" || exit 1
 
@@ -64,30 +69,33 @@ $(MRESULT): $(MDISK)
 
 parse:
 	utils/result_parser.py $(XRESULT) $(MRESULT) | tee result/comparison.txt
+	sed -n 's/|/;/pg' result/comparison.txt > result/comparison.csv
 
 xemutest:
 	rm -f $(XDISK) $(XRESULT)
 	$(MAKE) $(XRESULT)
 	utils/result_parser.py $(XRESULT) | tee result/only-xemu.txt
+	sed -n 's/|/;/pg' result/only-xemu.txt > result/only-xemu.csv
 
 megatest:
 	rm -f $(MDISK) $(MRESULT)
 	$(MAKE) $(MRESULT)
 	utils/result_parser.py $(MRESULT) | tee result/only-mega65.txt
+	sed -n 's/|/;/pg' result/only-mega65.txt > result/only-mega65.csv
 
 fulltest:
-	rm -f $(XDISK) $(XRESULT) $(MDISK) $(MRESULT)
-	$(MAKE) xemu
-	$(MAKE) $(XRESULT)
-	$(MAKE) mega65
-	$(MAKE) $(MRESULT)
+	$(MAKE) xemutest
+	$(MAKE) megatest
 	$(MAKE) parse
 
 publish:
 	cp $(PRG) public/test.prg
 	cp result/comparison.txt result/only-xemu.txt result/only-mega65.txt public/
+	cp result/comparison.csv result/only-xemu.csv result/only-mega65.csv public/
 
 clean:
-	rm -f $(PRG) $(LST) $(MAP) $(OBJ) $(XDISK) $(XRESULT) $(MDISK) $(MRESULT) result/comparison.txt result/only-xemu.txt result/only-mega65.txt
+	rm -f $(PRG) $(LST) $(MAP) $(OBJ) $(XDISK) $(XRESULT) $(MDISK) $(MRESULT)
+	rm -f result/comparison.txt result/only-xemu.txt result/only-mega65.txt
+	rm -f result/comparison.csv result/only-xemu.csv result/only-mega65.csv
 
 .PHONY: all xemu mega65 clean publish parse fulltest xemutest megatest

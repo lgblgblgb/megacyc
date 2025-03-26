@@ -1,0 +1,6 @@
+EXT ; OPC ; ASM      ; XEMU
+ -  ;  -  ; calibration ;  16
+$00 ; $00 ; BRK      ;   7
+$00 ; $4C ; JMP      ;   3
+$00 ; $E3 ; INW  $nn ;   6
+$00 ; $EA ; NOP      ;   1

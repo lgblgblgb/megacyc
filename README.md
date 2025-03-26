@@ -30,31 +30,45 @@ Foreword: at this stage only some opcodes are tested, because the framework need
 
 To test:
 
-* Make sure you use Linux on your PC/whatever
+* Make sure you use Linux/UNIX-like OS on your PC/whatever
 * Make sure every utility (including Xemu) is available in your PATH mentioned at the beginning of the Makefile
+* Make sure you have standard stuff (bash shell, GNU make, Python3, ...)
+
+Utilities used:
+
+* cl65: the "frontend" for CC65, you should have the full CC65 suite
+* xemu-xmega65: it's Xemu
+* mega65_etherload: etherload utility for MEGA65
+* mega65_ftp: FTP-like utility for MEGA65 (can work over Ethernet too)
+* c1541: disk image manipulation tool
+
+If you have anything with different name (or not in your PATH), you need to modify the Makefile
 
 ### To test only Xemu:
 
 * Make sure you have MEGA65 emulator of Xemu with the name mentioned in the Makefile
 * Type `make xemutest`.
-* If you see the directory, exit from Xemu
+* If you see the directory listing in the emulator then (and only then!) exit from Xemu
 
-Sample result can be found in this repository: public/only-xemu.txt
+Sample result can be found in this repository: public/only-xemu.txt (csv file is also available there)
 
 ### To test only MEGA65:
 
 * Make sure you have a MEGA65 ;)
 * Make sure it's turned on :)
+* Make sure you have D81 file (it can/should be an empty but formatted D81) on your SD-card with the name (exactly!): OPCYCLES.D81
 * Make sure it's connected to your Ethernet network
 * Make sure network "remote control" is enabled (motherboard DIP switch)
 * Make sure network "remote control" is activated (press SHIFT+POUND): you'll see flashing green/yellow power LED
 * Type `make megatest`
+* If you see the directory listing on your MEGA65 then (and only then!) press ENTER here (not on your MEGA65!)
 
-Sample result can be found in this repository: public/only-mega65.txt
+Sample result can be found in this repository: public/only-mega65.txt (csv file is also available there)
 
 ### If you test both, you can have a nice comparison:
 
 Either say `make parse` if you already ran both of `make xemutest` and `make megatest`, or type `make fulltest`
-to test first both of them and then parsing/comparing the results automatically.
+to test first both of them and then parsing/comparing the results automatically (it combines the functionality
+of both tests).
 
-Sample result can be found in this repository: public/comparison.txt
+Sample result can be found in this repository: public/comparison.txt (csv file is also available there)
