@@ -40,7 +40,22 @@ loop_counter:		.RES 2
 .ENDREP
 
 .SCOPE
+	; If it's a real MEGA65 we want to mount the disk image first
+	; For Xemu, it's done via command line
 	.WORD	nextline, 2025
+	.BYTE	$8B	; "IF"
+	.BYTE	" "
+	.BYTE	$C2	; "PEEK"
+	.BYTE	"($D60F) "
+	.BYTE	$AF	; "AND"
+	.BYTE	" 32 "
+	.BYTE	$A7	; "THEN"
+	.BYTE	" "
+	.WORD	$49FE	; "MOUNT"
+	.BYTE	" ",$22,"OPCYCLES.D81",$22,",U9"
+	.BYTE	0
+nextline:
+	.WORD	nextline2, 2026
 	.WORD	$02FE     ; "BANK" BASIC10/65 token (double byte token!)
 	.BYTE	" 0 : "
 	.BYTE	$9E ; "SYS" basic token
@@ -50,8 +65,8 @@ loop_counter:		.RES 2
 	.BYTE	$30 + .LOBYTE((run .MOD   100)/  10)
 	.BYTE	$30 + .LOBYTE( run .MOD    10)
 	.BYTE	0
-nextline:
-	.WORD	lastline, 2026
+nextline2:
+	.WORD	lastline, 2027
 	.WORD	$10FE	; "BSAVE" basic token
 	.BYTE	$22,"@RESULT,S",$22,", P($8000000) "
 	.BYTE	$A4	; "TO" basic token
@@ -60,8 +75,11 @@ nextline:
 	.WORD	$10CE	; "WPEEK"
 	.BYTE	"($8000000)"
 	.BYTE	$AB	; '-'
-	;.BYTE	"1), R, U8"
-	.BYTE	"1), U8"
+	;.BYTE	"1), R, U9"
+	.BYTE	"1), U9"
+	.BYTE	" : "
+	.WORD	$0CFE	; "CATALOG" basic token
+	.BYTE	" U9"
 	.BYTE	$00
 lastline:
 	.WORD	0,0
@@ -454,20 +472,24 @@ special_call:
 	RTS
 .ENDPROC
 
-test_suite:
-; IMPORTANT: Do not modify/remove comments "; --- " (unless for new tests / fixes) as those are parsed by the python script to present the result with opcodes!
+test_suite: .SCOPE
+; IMPORTANT:
+;	* Do not modify/remove comments "; --- " (unless for new tests / fixes) as those are parsed by the python script to present the result with opcodes!
+;	* TESTING opcode, byte_len signals a new opcode timing test, where "opcode" is the opcode (to be precise, the low byte, the high byte denotes prefixes, taken/not taken branch case etc)
+;	  "byte len" is the test payload size, then the payload follows. The payload will be executed at TEST_AREA not here, in-line!!
 ; --- BEGIN TEST
 ; -------------  00 BRK
 	TESTING $00, 1	; define test, test-id is $00, 1 = number of bytes
-	.BYTE	0	; n BYTES: the tested opcode bytes, here: opcode BRK
+	BRK		; n BYTES: the tested opcode bytes, here: opcode BRK
 ; -------------  4C JMP
 	TESTING $4C, 3
 	JMP	TEST_AREA+3
 ; ---            E3 INW $nn
 	TESTING	$E3, 2
 	INW	Z:test_zp4
-; --- EA NOP
-;	TESTING $EA, 1
-;	NOP
+; -------------- EA NOP
+	TESTING $EA, 1
+	NOP
 ; --- END TEST
 	.BYTE	0	; end of tests. Do not remove this!
+.ENDSCOPE

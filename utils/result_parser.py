@@ -65,6 +65,8 @@ def composer(opcodes : dict, res : dict):
     for ind in sorted(opcodes):
         opbyte, ext, asm = ind >> 8, ind & 0xFF, opcodes[ind]
         r = [f"{res[t][ind]:3}" if ind in res[t] else N_A for t in tests]
+        if set(r) == {N_A}:
+            continue
         if len(tests) == 2:
             if N_A in r:
                 diag = '-'
