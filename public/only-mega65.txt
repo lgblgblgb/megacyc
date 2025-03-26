@@ -1,0 +1,15 @@
+--- PARSING: result/mega65.res ---
+	(encoded length: 22)
+	(stream length: 16)
+	(measure loop cycle count: 22)
+TEST $0000 result is 9
+TEST $4C00 result is 5
+TEST $E300 result is 8
+TEST $EA00 result is 1
+	(remaining stream (2 bytes): b'M6')
+EXT | OPC | ASM      | MEGA65
+ -  |  -  | calibration |  22
+$00 | $00 | BRK      |   9
+$00 | $4C | JMP      |   5
+$00 | $E3 | INW  $nn |   8
+$00 | $EA | NOP      |   1

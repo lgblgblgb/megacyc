@@ -33,13 +33,15 @@ To test:
 * Make sure you use Linux on your PC/whatever
 * Make sure every utility (including Xemu) is available in your PATH mentioned at the beginning of the Makefile
 
-### To test only Xemu (or both MEGA65 and Xemu):
+### To test only Xemu:
 
 * Make sure you have MEGA65 emulator of Xemu with the name mentioned in the Makefile
 * Type `make xemutest`.
 * If you see the directory, exit from Xemu
 
-### To test only MEGA65 (or both of MEGA65 and Xemu):
+Sample result can be found in this repository: public/only-xemu.txt
+
+### To test only MEGA65:
 
 * Make sure you have a MEGA65 ;)
 * Make sure it's turned on :)
@@ -48,7 +50,11 @@ To test:
 * Make sure network "remote control" is activated (press SHIFT+POUND): you'll see flashing green/yellow power LED
 * Type `make megatest`
 
-### If you really test both, you can have a nice comparison:
+Sample result can be found in this repository: public/only-mega65.txt
+
+### If you test both, you can have a nice comparison:
 
 Either say `make parse` if you already ran both of `make xemutest` and `make megatest`, or type `make fulltest`
 to test first both of them and then parsing/comparing the results automatically.
+
+Sample result can be found in this repository: public/comparison.txt

@@ -1,2 +1,5 @@
-*.D81
-*.res
+/*.D81
+/*.res
+/comparison.txt
+/only-mega65.txt
+/only-xemu.txt

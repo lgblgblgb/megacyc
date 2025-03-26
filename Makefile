@@ -63,17 +63,17 @@ $(MRESULT): $(MDISK)
 	echo "read result,s $(MRESULT)" | $(C1541) $(MDISK)
 
 parse:
-	utils/result_parser.py $(XRESULT) $(MRESULT)
+	utils/result_parser.py $(XRESULT) $(MRESULT) | tee result/comparison.txt
 
 xemutest:
 	rm -f $(XDISK) $(XRESULT)
 	$(MAKE) $(XRESULT)
-	utils/result_parser.py $(XRESULT)
+	utils/result_parser.py $(XRESULT) | tee result/only-xemu.txt
 
 megatest:
 	rm -f $(MDISK) $(MRESULT)
 	$(MAKE) $(MRESULT)
-	utils/result_parser.py $(MRESULT)
+	utils/result_parser.py $(MRESULT) | tee result/only-mega65.txt
 
 fulltest:
 	rm -f $(XDISK) $(XRESULT) $(MDISK) $(MRESULT)
@@ -85,8 +85,9 @@ fulltest:
 
 publish:
 	cp $(PRG) public/test.prg
+	cp result/comparison.txt result/only-xemu.txt result/only-mega65.txt public/
 
 clean:
-	rm -f $(PRG) $(LST) $(MAP) $(OBJ) $(XDISK) $(XRESULT) $(MDISK) $(MRESULT)
+	rm -f $(PRG) $(LST) $(MAP) $(OBJ) $(XDISK) $(XRESULT) $(MDISK) $(MRESULT) result/comparison.txt result/only-xemu.txt result/only-mega65.txt
 
 .PHONY: all xemu mega65 clean publish parse fulltest xemutest megatest
