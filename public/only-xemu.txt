@@ -1,9 +1,10 @@
 --- PARSING: result/xemu.res ---
-	(encoded length: 22)
-	(stream length: 16)
+	(encoded length: 25)
+	(stream length: 19)
 	(measure loop cycle count: 16)
 TEST $0000 result is 7
 TEST $4C00 result is 3
+TEST $5C00 result is 4
 TEST $E300 result is 6
 TEST $EA00 result is 1
 	(remaining stream (2 bytes): b'M6')
@@ -11,5 +12,6 @@ EXT | OPC | ASM      | XEMU
  -  |  -  | calibration |  16
 $00 | $00 | BRK      |   7
 $00 | $4C | JMP      |   3
+$00 | $5C | MAP      |   4
 $00 | $E3 | INW  $nn |   6
 $00 | $EA | NOP      |   1

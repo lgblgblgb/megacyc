@@ -80,8 +80,10 @@ xemutest:
 megatest:
 	rm -f $(MDISK) $(MRESULT)
 	$(MAKE) $(MRESULT)
+	utils/result_parser.py $(MRESULT) ref | tee result/ref-mega65.txt
 	utils/result_parser.py $(MRESULT) | tee result/only-mega65.txt
 	sed -n 's/|/;/pg' result/only-mega65.txt > result/only-mega65.csv
+	sed -n 's/|/;/pg' result/ref-mega65.txt > result/ref-mega65.csv
 
 fulltest:
 	$(MAKE) xemutest
@@ -92,10 +94,12 @@ publish:
 	cp $(PRG) public/test.prg
 	cp result/comparison.txt result/only-xemu.txt result/only-mega65.txt public/
 	cp result/comparison.csv result/only-xemu.csv result/only-mega65.csv public/
+	cp result/ref-mega65.txt result/ref-mega65.csv public/
 
 clean:
 	rm -f $(PRG) $(LST) $(MAP) $(OBJ) $(XDISK) $(XRESULT) $(MDISK) $(MRESULT)
 	rm -f result/comparison.txt result/only-xemu.txt result/only-mega65.txt
 	rm -f result/comparison.csv result/only-xemu.csv result/only-mega65.csv
+	rm -f result/ref-mega65.txt result/ref-mega65.csv
 
 .PHONY: all xemu mega65 clean publish parse fulltest xemutest megatest

@@ -53,10 +53,9 @@ def import_asm_comments(fn : str):
     return res
 
 
-
 def composer(opcodes : dict, res : dict):
 
-    tests, N_A, asm_align = sorted(res), "N/A", max(map(len, opcodes.values()))
+    tests, N_A, REF, asm_align = sorted(res), "N/A", "REF", max(map(len, opcodes.values()))
     r = ["EXT", "OPC", ("{:"+str(asm_align)+ "}").format("ASM")] + tests
     if len(tests) == 2:
         r.append("COMPARISON")
@@ -64,6 +63,8 @@ def composer(opcodes : dict, res : dict):
     opcodes[-1] = "calibration"
     for ind in sorted(opcodes):
         opbyte, ext, asm = ind >> 8, ind & 0xFF, opcodes[ind]
+        if REF in tests and ind not in res[REF]:
+            continue
         r = [f"{res[t][ind]:3}" if ind in res[t] else N_A for t in tests]
         if set(r) == {N_A}:
             continue
@@ -80,12 +81,27 @@ def composer(opcodes : dict, res : dict):
         print(" | ".join(r))
 
 
+def add_reference(fn : str):
 
-def add_reference():
-
-    # TODO
-    return {-1: 19}
-
+    res = {}
+    with open(fn, "rt") as f:
+        for l in f:
+            l = tuple(map(str.strip, l.split(";")))
+            if len(l) < 4:
+                continue
+            try:
+                opc = int(l[0].lstrip("$"), 16)
+            except ValueError:
+                continue
+            try:
+                r = int(l[2])
+            except ValueError:
+                continue
+            opc = (opc >> 8) + ((opc & 0xFF) << 8)
+            if opc in res:
+                raise RuntimeError(f"Reference file has more lines for op ${opc:X}")
+            res[opc] = r
+    return res
 
 
 def parse_result(fn : str):
@@ -126,7 +142,7 @@ if __name__ == "__main__":
         sys.exit(1)
     composer(opcodes = import_asm_comments("test.a65"), res = {
         fn.replace("\\", "/").split("/")[-1].split(".")[0].upper().replace("_", " "):
-            add_reference() if fn == "ref" else parse_result(fn)
+            add_reference("reference_results.txt") if fn == "ref" else parse_result(fn)
         for fn in sys.argv[1:]
     })
     sys.exit(0)

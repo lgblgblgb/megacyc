@@ -21,11 +21,12 @@
 
 result_ptr:		.RES 4
 source_ptr:		.RES 2
-test_zp4:		.RES 4	; 4 bytes -> for opcode testing, if opcode needs some ZP locs
 secondary_correction:	.RES 1
 last_cycle_result:	.RES 1
 wait_for_this_frame:	.RES 1
 loop_counter:		.RES 2
+
+test_zp_word:		.RES 2	; 2 bytes of free-to-change ZP loc for testing
 
 .SEGMENT "LOADADDR"
 
@@ -157,11 +158,15 @@ TEMP_STACK	= $E000
 	TRB	$D011
 	; Well ... why not ...
 	INC	$D020
+	; We want to keep registers at zero, other than accu (because the timing loop itself will mess that up anyway) ...
+	LDX	#0
+	LDY	#0
+	LDZ	#0
 	; Finally ...
-	LDX	FRAME_COUNTER_REG
-	INX
-	STX	wait_for_this_frame
-:	CPX	FRAME_COUNTER_REG		; wait for the next frame to begin
+	LDA	FRAME_COUNTER_REG
+	INA
+	STA	wait_for_this_frame
+:	CMP	FRAME_COUNTER_REG		; wait for the next frame to begin
 	BNE	:-
 	JMP	TEST_AREA			; give control to the test loop now!
 run_test_return:				; test loop will jump back here (note: we can't use stack with JSR/RTS as we want to test task ops as well!)
@@ -216,6 +221,8 @@ run_test_return:				; test loop will jump back here (note: we can't use stack wi
 	STX	secondary_correction	; restore secondary_correction back to zero - it's valid only for a single run
 soon_over:
 	; Ok, now the final result in A, huh ...
+	EOM	; CLV "protected" EOM
+	CLV
 	; About to return!
 	PLZ
 	PLY
@@ -319,6 +326,11 @@ test_loop_tail:
 	; *** DO NOT USE OUR ZP DEFINED LOCS AFTER THIS ***
 	LDA	#0
 	TAB
+	TAZ
+	TAX
+	TAY
+	MAP	; also mapping, just to be sure
+	EOM
 	; Restore banking
 	restore_d030 = * + 1
 	LDA	#0
@@ -326,6 +338,9 @@ test_loop_tail:
 	restore_1 = * + 1
 	LDA	#0
 	STA	1
+	; Release the "force fast gate"
+	LDA	#64
+	STA	0
 	; Pure cosmetic
 	restore_d020 = * + 1
 	LDA	#0
@@ -477,6 +492,7 @@ test_suite: .SCOPE
 ;	* Do not modify/remove comments "; --- " (unless for new tests / fixes) as those are parsed by the python script to present the result with opcodes!
 ;	* TESTING opcode, byte_len signals a new opcode timing test, where "opcode" is the opcode (to be precise, the low byte, the high byte denotes prefixes, taken/not taken branch case etc)
 ;	  "byte len" is the test payload size, then the payload follows. The payload will be executed at TEST_AREA not here, in-line!!
+;	* during testing X,Y,Z registers are initialized zero, however A is messed up!!!!!
 ; --- BEGIN TEST
 ; -------------  00 BRK
 	TESTING $00, 1	; define test, test-id is $00, 1 = number of bytes
@@ -484,9 +500,12 @@ test_suite: .SCOPE
 ; -------------  4C JMP
 	TESTING $4C, 3
 	JMP	TEST_AREA+3
+; -------------- 5C MAP
+	TESTING	$5C, 1
+	MAP			; we can test MAP as-is, as only A register is messed up by the tester but others being zero, it won't cause problems (hopefully)
 ; ---            E3 INW $nn
 	TESTING	$E3, 2
-	INW	Z:test_zp4
+	INW	Z:test_zp_word
 ; -------------- EA NOP
 	TESTING $EA, 1
 	NOP
