@@ -45,7 +45,7 @@ def import_asm_comments(fn : str):
                 if opc in res:
                     raise RuntimeError(f"Opcode ${opc:02X} was already defined but reused in line {ln} of {fn}: {ol}")
                 l[3] = f"{l[3]:5}"
-                res[((opc & 0xFF) << 8) + (opc >> 8)] = "".join(l[3:]).rstrip()
+                res[opc] = "".join(l[3:]).rstrip()
     if process:
         raise RuntimeError("No proper closer comment!")
     if len(res) == 0:
@@ -87,7 +87,7 @@ def add_reference(fn : str):
     with open(fn, "rt") as f:
         for l in f:
             l = tuple(map(str.strip, l.split(";")))
-            if len(l) < 4:
+            if len(l) < 3 or l[0].startswith("#"):
                 continue
             try:
                 opc = int(l[0].lstrip("$"), 16)
@@ -97,7 +97,6 @@ def add_reference(fn : str):
                 r = int(l[2])
             except ValueError:
                 continue
-            opc = (opc >> 8) + ((opc & 0xFF) << 8)
             if opc in res:
                 raise RuntimeError(f"Reference file has more lines for op ${opc:X}")
             res[opc] = r
@@ -128,7 +127,7 @@ def parse_result(fn : str):
             break
         if len(result) < 2:
             raise RuntimeError("Unexpected end of the result stream (id)")
-        testid, result = result[1] + (result[0] << 8), result[2:]   # LSB/MSB swap is by intent!
+        testid, result = result[0] + (result[1] << 8), result[2:]
         print(f"TEST ${testid:04X} result is {cycles}")
         parsed[testid] = cycles
     print(f"\t(remaining stream ({len(result)} bytes): {result})")
@@ -142,7 +141,7 @@ if __name__ == "__main__":
         sys.exit(1)
     composer(opcodes = import_asm_comments("test.a65"), res = {
         fn.replace("\\", "/").split("/")[-1].split(".")[0].upper().replace("_", " "):
-            add_reference("reference_results.txt") if fn == "ref" else parse_result(fn)
+            add_reference("utils/reference_results.txt") if fn == "ref" else parse_result(fn)
         for fn in sys.argv[1:]
     })
     sys.exit(0)

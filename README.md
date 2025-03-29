@@ -72,3 +72,12 @@ to test first both of them and then parsing/comparing the results automatically 
 of both tests).
 
 Sample result can be found in this repository: public/comparison.txt (csv file is also available there)
+
+### Is this test valid / precise enough at all?
+
+To decide this question, with "MEGA65 testing" (or "both" / fulltest) there will be another result: Kibo had measurred some of the
+opcodes before. I use these results (with his permission) to have a "ref" (refence) test which will also create a result file:
+
+public/ref-mega65.txt (csv file is also available there)
+
+This should have the very same result with my measurements, ie "OK" for all tests.

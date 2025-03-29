@@ -490,24 +490,24 @@ special_call:
 test_suite: .SCOPE
 ; IMPORTANT:
 ;	* Do not modify/remove comments "; --- " (unless for new tests / fixes) as those are parsed by the python script to present the result with opcodes!
-;	* TESTING opcode, byte_len signals a new opcode timing test, where "opcode" is the opcode (to be precise, the low byte, the high byte denotes prefixes, taken/not taken branch case etc)
+;	* TESTING opcode, byte_len signals a new opcode timing test, where "opcode" is the opcode (to be precise, the HI byte, the LO byte denotes prefixes, taken/not taken branch case etc)
 ;	  "byte len" is the test payload size, then the payload follows. The payload will be executed at TEST_AREA not here, in-line!!
 ;	* during testing X,Y,Z registers are initialized zero, however A is messed up!!!!!
 ; --- BEGIN TEST
-; -------------  00 BRK
-	TESTING $00, 1	; define test, test-id is $00, 1 = number of bytes
+; -------------  0000 BRK
+	TESTING $0000, 1	; define test, test-id is $00, 1 = number of bytes
 	BRK		; n BYTES: the tested opcode bytes, here: opcode BRK
-; -------------  4C JMP
-	TESTING $4C, 3
+; -------------  4C00 JMP
+	TESTING $4C00, 3
 	JMP	TEST_AREA+3
-; -------------- 5C MAP
-	TESTING	$5C, 1
+; -------------- 5C00 MAP
+	TESTING	$5C00, 1
 	MAP			; we can test MAP as-is, as only A register is messed up by the tester but others being zero, it won't cause problems (hopefully)
-; ---            E3 INW $nn
-	TESTING	$E3, 2
+; ---            E300 INW $nn
+	TESTING	$E300, 2
 	INW	Z:test_zp_word
-; -------------- EA NOP
-	TESTING $EA, 1
+; -------------- EA00 NOP
+	TESTING $EA00, 1
 	NOP
 ; --- END TEST
 	.BYTE	0	; end of tests. Do not remove this!
