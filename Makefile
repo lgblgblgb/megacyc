@@ -27,7 +27,6 @@ OBJ	= test.o
 LST	= test.lst
 MAP	= test.map
 LINKCFG	= linker.ld
-DEPENDS	= Makefile
 
 XDISK	= result/XEMUDISK.D81
 MDISK	= result/OPCYCLES.D81
@@ -36,7 +35,7 @@ MRESULT = result/mega65.res
 
 all: $(PRG)
 
-$(PRG):	$(SRC) $(LINKCFG) $(DEPENDS)
+$(PRG):	$(SRC) $(LINKCFG) Makefile testbench.i65
 	$(CL65) -C $(LINKCFG) -o $(PRG) --listing $(LST) --mapfile $(MAP) $(SRC)
 	rm -f $(OBJ)
 

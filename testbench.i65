@@ -1,0 +1,497 @@
+; MEGA65 and Xemu opcode/cycle meassure/test tool.
+;
+; Copyright (C)2025 LGB (Gábor Lénárt) <lgblgblgb@gmail.com>
+;
+; This program is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 3 of the License, or
+; (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+TESTING $0000	; |BRK|
+	BRK
+;TESTING $0100	; |ORA ($nn,X)|
+;TESTING $0200	; |CLE|
+;TESTING $0300	; |SEE|
+;TESTING $0400	; |TSB $nn|
+;TESTING $0500	; |ORA $nn|
+;TESTING $0503	; |ORQ $nn| NEG_NEG_PREFIXED
+;TESTING $0600	; |ASL $nn|
+;TESTING $0603	; |ASLQ $nn| NEG_NEG_PREFIXED
+;TESTING $0700	; |RMB0 $nn|
+TESTING $0800	; |PHP|
+	PHP
+;TESTING $0900	; |ORA #$nn|
+TESTING $0A00	; |ASL A|
+	ASL	A
+TESTING $0A03	; |ASLQ Q| NEG_NEG_PREFIXED
+	NEG_NEG_PREFIXED
+	ASL	A
+;TESTING $0B00	; |TSY|
+;TESTING $0C00	; |TSB $nnnn|
+;TESTING $0D00	; |ORA $nnnn|
+;TESTING $0D03	; |ORQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $0E00	; |ASL $nnnn|
+;TESTING $0E03	; |ASLQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $0F00	; |BBR0 $nn,$rr|
+;TESTING $0F01	; |BBR0 $nn,$rr| (conditional branch taken)
+
+TESTING $10FF	; |BPL $rr| - extra stuff
+	LDA	#$FF
+TESTING $1000	; |BPL $rr|
+	LDA	#$FF
+	BPL	:+
+TESTING $10FF	; |BPL $rr| (conditional branch taken) - extra stuff
+	LDA	#$00
+TESTING $1001	; |BPL $rr| (conditional branch taken)
+	LDA	#$00
+	BPL	:+
+
+
+
+;TESTING $1100	; |ORA ($nn),Y|
+;TESTING $1200	; |ORA ($nn),Z|
+;TESTING $1202	; |ORA [$nn],Z| NOP_PREFIXED
+;TESTING $1203	; |ORQ ($nn)| NEG_NEG_PREFIXED (no Z!)
+;TESTING $1204	; |ORQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
+;TESTING $1300	; |BPL $rrrr|
+;TESTING $1301	; |BPL $rrrr| (conditional branch taken)
+;TESTING $1400	; |TRB $nn|
+;TESTING $1500	; |ORA $nn,X|
+;TESTING $1600	; |ASL $nn,X|
+;TESTING $1603	; |ASLQ $nn,X| NEG_NEG_PREFIXED
+;TESTING $1700	; |RMB1 $nn|
+;TESTING $1800	; |CLC|
+;TESTING $1900	; |ORA $nnnn,Y|
+;TESTING $1A00	; |INC|
+;TESTING $1A03	; |INQ| NEG_NEG_PREFIXED
+;TESTING $1B00	; |INZ|
+;TESTING $1C00	; |TRB $nnnn|
+;TESTING $1D00	; |ORA $nnnn,X|
+;TESTING $1E00	; |ASL $nnnn,X|
+;TESTING $1E03	; |ASLQ $nnnn,X| NEG_NEG_PREFIXED
+;TESTING $1F00	; |BBR1 $nn,$rr|
+;TESTING $1F01	; |BBR1 $nn,$rr| (conditional branch taken)
+TESTING $2000	; |JSR $nnnn|
+	JSR	:+
+;TESTING $2100	; |AND ($nn,X)|
+;TESTING $2200	; |JSR ($nnnn)|
+;TESTING $2300	; |JSR ($nnnn,X)|
+;TESTING $2400	; |BIT $nn|
+;TESTING $2403	; |BITQ $nn| NEG_NEG_PREFIXED
+;TESTING $2500	; |AND $nn|
+;TESTING $2503	; |ANDQ $nn| NEG_NEG_PREFIXED
+;TESTING $2600	; |ROL $nn|
+;TESTING $2603	; |ROLQ $nn| NEG_NEG_PREFIXED
+;TESTING $2700	; |RMB2 $nn|
+TESTING $2800	; |PLP|
+	PLP
+;TESTING $2900	; |AND #$nn|
+;TESTING $2A00	; |ROL A|
+;TESTING $2A03	; |ROLQ Q| NEG_NEG_PREFIXED
+;TESTING $2B00	; |TYS|
+;TESTING $2C00	; |BIT $nnnn|
+;TESTING $2C03	; |BITQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $2D00	; |AND $nnnn|
+;TESTING $2D03	; |ANDQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $2E00	; |ROL $nnnn|
+;TESTING $2E03	; |ROLQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $2F00	; |BBR2 $nn,$rr|
+;TESTING $2F01	; |BBR2 $nn,$rr| (conditional branch taken)
+;TESTING $3000	; |BMI $rr|
+;TESTING $3001	; |BMI $rr| (conditional branch taken)
+;TESTING $3100	; |AND ($nn),Y|
+;TESTING $3200	; |AND ($nn),Z|
+;TESTING $3202	; |AND [$nn],Z| NOP_PREFIXED
+;TESTING $3203	; |ANDQ ($nn)| NEG_NEG_PREFIXED (no Z!)
+;TESTING $3204	; |ANDQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
+;TESTING $3300	; |BMI $rrrr|
+;TESTING $3301	; |BMI $rrrr| (conditional branch taken)
+;TESTING $3400	; |BIT $nn,X|
+;TESTING $3500	; |AND $nn,X|
+;TESTING $3600	; |ROL $nn,X|
+;TESTING $3603	; |ROLQ $nn,X| NEG_NEG_PREFIXED
+;TESTING $3700	; |RMB3 $nn|
+;TESTING $3800	; |SEC|
+;TESTING $3900	; |AND $nnnn,Y|
+;TESTING $3A00	; |DEC|
+;TESTING $3A03	; |DEQ| NEG_NEG_PREFIXED
+;TESTING $3B00	; |DEZ|
+;TESTING $3C00	; |BIT $nnnn,X|
+;TESTING $3D00	; |AND $nnnn,X|
+;TESTING $3E00	; |ROL $nnnn,X|
+;TESTING $3E03	; |ROLQ $nnnn,X| NEG_NEG_PREFIXED
+;TESTING $3F00	; |BBR3 $nn,$rr|
+;TESTING $3F01	; |BBR3 $nn,$rr| (conditional branch taken)
+;TESTING $4000	; |RTI|
+;TESTING $4100	; |EOR ($nn,X)|
+;TESTING $4200	; |NEG|
+;TESTING $4203	; |NEGQ| NEG_NEG_PREFIXED
+;TESTING $4300	; |ASR|
+;TESTING $4303	; |ASRQ| NEG_NEG_PREFIXED
+;TESTING $4400	; |ASR $nn|
+;TESTING $4403	; |ASRQ $nn| NEG_NEG_PREFIXED
+;TESTING $4500	; |EOR $nn|
+;TESTING $4503	; |EORQ $nn| NEG_NEG_PREFIXED
+;TESTING $4600	; |LSR $nn|
+;TESTING $4603	; |LSRQ $nn| NEG_NEG_PREFIXED
+;TESTING $4700	; |RMB4 $nn|
+TESTING $4800	; |PHA|
+	PHA
+;TESTING $4900	; |EOR #$nn|
+;TESTING $4A00	; |LSR A|
+;TESTING $4A03	; |LSRQ Q| NEG_NEG_PREFIXED
+;TESTING $4B00	; |TAZ|
+TESTING $4C00	; |JMP $nnnn|
+	JMP	:+
+;TESTING $4D00	; |EOR $nnnn|
+;TESTING $4D03	; |EORQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $4E00	; |LSR $nnnn|
+;TESTING $4E03	; |LSRQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $4F00	; |BBR4 $nn,$rr|
+;TESTING $4F01	; |BBR4 $nn,$rr| (conditional branch taken)
+;TESTING $5000	; |BVC $rr|
+;TESTING $5001	; |BVC $rr| (conditional branch taken)
+;TESTING $5100	; |EOR ($nn),Y|
+;TESTING $5200	; |EOR ($nn),Z|
+;TESTING $5202	; |EOR [$nn],Z| NOP_PREFIXED
+;TESTING $5203	; |EORQ ($nn)| NEG_NEG_PREFIXED (no Z!)
+;TESTING $5204	; |EORQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
+;TESTING $5300	; |BVC $rrrr|
+;TESTING $5301	; |BVC $rrrr| (conditional branch taken)
+;TESTING $5400	; |ASR $nn,X|
+;TESTING $5403	; |ASRQ $nn,X| NEG_NEG_PREFIXED
+;TESTING $5500	; |EOR $nn,X|
+;TESTING $5503	; |LSRQ $nn,X| NEG_NEG_PREFIXED
+;TESTING $5600	; |LSR $nn,X|
+;TESTING $5700	; |RMB5 $nn|
+TESTING $5800	; |CLI|
+	CLI
+;TESTING $5900	; |EOR $nnnn,Y|
+TESTING $5A00	; |PHY|
+	PHY
+
+TESTING $5BFF	; |TAB| - extra stuff
+	LDA	#.HIBYTE(TEMP_ZP)
+TESTING $5B00	; |TAB|
+	LDA	#.HIBYTE(TEMP_ZP)
+	TAB
+
+TESTING $5C00	; |MAP|
+	MAP			; we can test MAP as-is, as only A register is messed up by the tester but others being zero, it won't cause problems (hopefully)
+
+;TESTING $5D00	; |EOR $nnnn,X|
+;TESTING $5E00	; |LSR $nnnn,X|
+;TESTING $5E03	; |LSRQ $nnnn,X| NEG_NEG_PREFIXED
+;TESTING $5F00	; |BBR5 $nn,$rr|
+;TESTING $5F01	; |BBR5 $nn,$rr| (conditional branch taken)
+;TESTING $6000	; |RTS|
+;TESTING $6100	; |ADC ($nn,X)|
+;TESTING $6200	; |RTS #$nn|
+
+TESTING $6300	; |BSR $rrrr|
+	BSR	:+
+
+TESTING $6400	; |STZ $nn|
+	STZ	Z:test_zp_data4
+
+TESTING $6500	; |ADC $nn|
+	ADC	Z:test_zp_data4
+
+TESTING $6503	; |ADCQ $nn| NEG_NEG_PREFIXED
+	NEG_NEG_PREFIXED
+	ADC	Z:test_zp_data4
+
+;TESTING $6600	; |ROR $nn|
+;TESTING $6603	; |RORQ $nn| NEG_NEG_PREFIXED
+;TESTING $6700	; |RMB6 $nn|
+
+TESTING $6800	; |PLA|
+	PLA
+
+TESTING $6900	; |ADC #$nn|
+	ADC	#0
+
+TESTING $6A00	; |ROR A|
+	ROR	A
+
+TESTING $6A03	; |RORQ Q| NEG_NEG_PREFIXED
+	NEG_NEG_PREFIXED
+	ROR	A
+
+TESTING $6B00	; |TZA|
+	TZA
+
+TESTING $6C00	; |JMP ($nnnn)|
+	JMP	(IRQ_VECTOR)
+
+TESTING $6D00	; |ADC $nnnn|
+	ADC	$2000
+
+;TESTING $6D03	; |ADCQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $6E00	; |ROR $nnnn|
+;TESTING $6E03	; |RORQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $6F00	; |BBR6 $nn,$rr|
+;TESTING $6F01	; |BBR6 $nn,$rr| (conditional branch taken)
+;TESTING $7000	; |BVS $rr|
+;TESTING $7001	; |BVS $rr| (conditional branch taken)
+;TESTING $7100	; |ADC ($nn),Y|
+;TESTING $7200	; |ADC ($nn),Z|
+;TESTING $7202	; |ADC [$nn],Z| NOP_PREFIXED
+;TESTING $7203	; |ADCQ ($nn)| NEG_NEG_PREFIXED (no Z!)
+;TESTING $7204	; |ADCQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
+;TESTING $7300	; |BVS $rrrr|
+;TESTING $7301	; |BVS $rrrr| (conditional branch taken)
+;TESTING $7400	; |STZ $nn,X|
+;TESTING $7500	; |ADC $nn,X|
+;TESTING $7600	; |ROR $nn,X|
+;TESTING $7603	; |RORQ $nn,X| NEG_NEG_PREFIXED
+;TESTING $7700	; |RMB7 $nn|
+TESTING $7800	; |SEI|
+	SEI
+;TESTING $7900	; |ADC $nnnn,Y|
+TESTING $7A00	; |PLY|
+	PLY
+TESTING $7B00	; |TBA|
+	TBA
+TESTING $7C00	; |JMP ($nnnn,X)|
+	JMP	(IRQ_VECTOR,X)		; X is zero during tests
+;TESTING $7D00	; |ADC $nnnn,X|
+;TESTING $7E00	; |ROR $nnnn,X|
+;TESTING $7E03	; |RORQ $nnnn,X| NEG_NEG_PREFIXED
+;TESTING $7F00	; |BBR7 $nn,$rr|
+;TESTING $7F01	; |BBR7 $nn,$rr| (conditional branch taken)
+;TESTING $8000	; |BRA $rr|
+;TESTING $8100	; |STA ($nn,X)|
+;TESTING $8200	; |STA ($nn,SP),Y|
+;TESTING $8300	; |BRA $rrrr|
+;TESTING $8400	; |STY $nn|
+;TESTING $8500	; |STA $nn|
+;TESTING $8503	; |STQ $nn| NEG_NEG_PREFIXED
+;TESTING $8600	; |STX $nn|
+;TESTING $8700	; |SMB0 $nn|
+;TESTING $8800	; |DEY|
+;TESTING $8900	; |BIT #$nn|
+;TESTING $8A00	; |TXA|
+;TESTING $8B00	; |STY $nnnn,X|
+;TESTING $8C00	; |STY $nnnn|
+;TESTING $8D00	; |STA $nnnn|
+;TESTING $8D03	; |STQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $8E00	; |STX $nnnn|
+;TESTING $8F00	; |BBS0 $nn,$rr|
+;TESTING $8F01	; |BBS0 $nn,$rr| (conditional branch taken)
+;TESTING $9000	; |BCC $rr|
+;TESTING $9001	; |BCC $rr| (conditional branch taken)
+;TESTING $9100	; |STA ($nn),Y|
+;TESTING $9200	; |STA ($nn),Z|
+;TESTING $9202	; |STA [$nn],Z| NOP_PREFIXED
+;TESTING $9203	; |STQ ($nn)| NEG_NEG_PREFIXED (no Z!)
+;TESTING $9204	; |STQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
+;TESTING $9300	; |BCC $rrrr|
+;TESTING $9301	; |BCC $rrrr| (conditional branch taken)
+;TESTING $9400	; |STY $nn,X|
+;TESTING $9500	; |STA $nn,X|
+;TESTING $9600	; |STX $nn,Y|
+;TESTING $9700	; |SMB1 $nn|
+;TESTING $9800	; |TYA|
+;TESTING $9900	; |STA $nnnn,Y|
+;TESTING $9A00	; |TXS|
+;TESTING $9B00	; |STX $nnnn,Y|
+;TESTING $9C00	; |STZ $nnnn|
+;TESTING $9D00	; |STA $nnnn,X|
+;TESTING $9E00	; |STZ $nnnn,X|
+;TESTING $9F00	; |BBS1 $nn,$rr|
+;TESTING $9F01	; |BBS1 $nn,$rr| (conditional branch taken)
+;TESTING $A000	; |LDY #$nn|
+;TESTING $A100	; |LDA ($nn,X)|
+;TESTING $A200	; |LDX #$nn|
+;TESTING $A300	; |LDZ #$nn|
+;TESTING $A400	; |LDY $nn|
+;TESTING $A500	; |LDA $nn|
+;TESTING $A503	; |LDQ $nn| NEG_NEG_PREFIXED
+;TESTING $A600	; |LDX $nn|
+;TESTING $A700	; |SMB2 $nn|
+;TESTING $A800	; |TAY|
+;TESTING $A900	; |LDA #$nn|
+;TESTING $AA00	; |TAX|
+;TESTING $AB00	; |LDZ $nnnn|
+;TESTING $AC00	; |LDY $nnnn|
+;TESTING $AD00	; |LDA $nnnn|
+;TESTING $AD03	; |LDQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $AE00	; |LDX $nnnn|
+;TESTING $AF00	; |BBS2 $nn,$rr|
+;TESTING $AF01	; |BBS2 $nn,$rr| (conditional branch taken)
+;TESTING $B000	; |BCS $rr|
+;TESTING $B001	; |BCS $rr| (conditional branch taken)
+;TESTING $B100	; |LDA ($nn),Y|
+;TESTING $B200	; |LDA ($nn),Z|
+;TESTING $B202	; |LDA [$nn],Z| NOP_PREFIXED
+;TESTING $B203	; |LDQ ($nn),Z| NEG_NEG_PREFIXED
+;TESTING $B204	; |LDQ [$nn],Z| NOP_NEG_NEG_PREFIXED
+;TESTING $B300	; |BCS $rrrr|
+;TESTING $B301	; |BCS $rrrr| (conditional branch taken)
+;TESTING $B400	; |LDY $nn,X|
+;TESTING $B500	; |LDA $nn,X|
+;TESTING $B600	; |LDX $nn,Y|
+;TESTING $B700	; |SMB3 $nn|
+;TESTING $B800	; |CLV|
+;TESTING $B900	; |LDA $nnnn,Y|
+;TESTING $BA00	; |TSX|
+;TESTING $BB00	; |LDZ $nnnn,X|
+;TESTING $BC00	; |LDY $nnnn,X|
+;TESTING $BD00	; |LDA $nnnn,X|
+;TESTING $BE00	; |LDX $nnnn,Y|
+;TESTING $BF00	; |BBS3 $nn,$rr|
+;TESTING $BF01	; |BBS3 $nn,$rr| (conditional branch taken)
+;TESTING $C000	; |CPY #$nn|
+;TESTING $C100	; |CMP ($nn,X)|
+;TESTING $C200	; |CPZ #$nn|
+;TESTING $C300	; |DEW $nn|
+;TESTING $C400	; |CPY $nn|
+;TESTING $C500	; |CMP $nn|
+;TESTING $C503	; |CMPQ $nn| NEG_NEG_PREFIXED
+;TESTING $C600	; |DEC $nn|
+;TESTING $C603	; |DEQ $nn| NEG_NEG_PREFIXED
+;TESTING $C700	; |SMB4 $nn|
+;TESTING $C800	; |INY|
+;TESTING $C900	; |CMP #$nn|
+;TESTING $CA00	; |DEX|
+;TESTING $CB00	; |ASW $nnnn|
+;TESTING $CC00	; |CPY $nnnn|
+;TESTING $CD00	; |CMP $nnnn|
+;TESTING $CD03	; |CMPQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $CE00	; |DEC $nnnn|
+;TESTING $CE03	; |DEQ $nnnn| NEG_NEG_PREFIXED
+;TESTING $CF00	; |BBS4 $nn,$rr|
+;TESTING $CF01	; |BBS4 $nn,$rr| (conditional branch taken)
+;TESTING $D000	; |BNE $rr|
+;TESTING $D001	; |BNE $rr| (conditional branch taken)
+;TESTING $D100	; |CMP ($nn),Y|
+;TESTING $D200	; |CMP ($nn),Z|
+;TESTING $D202	; |CMP [$nn],Z| NOP_PREFIXED
+;TESTING $D203	; |CMPQ ($nn)| NEG_NEG_PREFIXED (no Z!)
+;TESTING $D204	; |CMPQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
+;TESTING $D300	; |BNE $rrrr|
+;TESTING $D301	; |BNE $rrrr| (conditional branch taken)
+;TESTING $D400	; |CPZ $nn|
+;TESTING $D500	; |CMP $nn,X|
+;TESTING $D600	; |DEC $nn,X|
+;TESTING $D603	; |DEQ $nn,X| NEG_NEG_PREFIXED
+;TESTING $D700	; |SMB5 $nn|
+;TESTING $D800	; |CLD|
+;TESTING $D900	; |CMP $nnnn,Y|
+TESTING $DA00	; |PHX|
+	PHX
+TESTING $DB00	; |PHZ|
+	PHZ
+;TESTING $DC00	; |CPZ $nnnn|
+;TESTING $DD00	; |CMP $nnnn,X|
+;TESTING $DE00	; |DEC $nnnn,X|
+;TESTING $DE03	; |DEQ $nnnn,X| NEG_NEG_PREFIXED
+;TESTING $DF00	; |BBS5 $nn,$rr|
+;TESTING $DF01	; |BBS5 $nn,$rr| (conditional branch taken)
+;TESTING $E000	; |CPX #$nn|
+;TESTING $E100	; |SBC ($nn,X)|
+;TESTING $E200	; |LDA ($nn,SP),Y|
+
+TESTING $E300	; |INW $nn|
+	INW	Z:test_zp_data4
+
+TESTING $E400	; |CPX $nn|
+	CPX	Z:test_zp_data4
+
+TESTING $E500	; |SBC $nn|
+	SBC	Z:test_zp_data4
+
+TESTING $E503	; |SBCQ $nn| NEG_NEG_PREFIXED
+	NEG_NEG_PREFIXED
+	SBC	Z:test_zp_data4
+
+TESTING $E600	; |INC $nn|
+	INC	Z:test_zp_data4
+
+TESTING $E603	; |INQ $nn| NEG_NEG_PREFIXED
+	NEG_NEG_PREFIXED
+	INC	Z:test_zp_data4
+
+;TESTING $E700	; |SMB6 $nn|
+
+TESTING $E800	; |INX|
+	INX
+
+TESTING $E900	; |SBC #$nn|
+	SBC	#$80
+
+TESTING $EA00	; |NOP|
+	NOP
+
+TESTING $EB00	; |ROW $nnnn|
+	ROW	A:test_abs_data4
+
+TESTING $EC00	; |CPX $nnnn|
+	CPX	A:test_abs_data4
+
+TESTING $ED00	; |SBC $nnnn|
+	SBC	A:test_abs_data4
+
+TESTING $ED03	; |SBCQ $nnnn| NEG_NEG_PREFIXED
+	NEG_NEG_PREFIXED
+	SBC	A:test_abs_data4
+
+TESTING $EE00	; |INC $nnnn|
+	INC	A:test_abs_data4
+
+TESTING $EE03	; |INQ $nnnn| NEG_NEG_PREFIXED
+	NEG_NEG_PREFIXED
+	INC	A:test_abs_data4
+
+;TESTING $EF00	; |BBS6 $nn,$rr|
+;TESTING $EF01	; |BBS6 $nn,$rr| (conditional branch taken)
+;TESTING $F000	; |BEQ $rr|
+;TESTING $F001	; |BEQ $rr| (conditional branch taken)
+;TESTING $F100	; |SBC ($nn),Y|
+;TESTING $F200	; |SBC ($nn),Z|
+;TESTING $F202	; |SBC [$nn],Z| NOP_PREFIXED
+;TESTING $F203	; |SBCQ ($nn)| NEG_NEG_PREFIXED (no Z!)
+;TESTING $F204	; |SBCQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
+;TESTING $F300	; |BEQ $rrrr|
+;TESTING $F301	; |BEQ $rrrr| (conditional branch taken)
+
+TESTING $F400	; |PHW #$nnnn|
+	PHW	#$FFFF
+
+;TESTING $F500	; |SBC $nn,X|
+;TESTING $F600	; |INC $nn,X|
+;TESTING $F603	; |INQ $nn,X| NEG_NEG_PREFIXED
+
+TESTING $F700	; |SMB7 $nn|
+	SMB7	Z:test_zp_data4
+
+TESTING $F800	; |SED|
+	SED
+
+TESTING $F900	; |SBC $nnnn,Y|
+	SBC	A:test_abs_data4,Y
+
+TESTING $FA00	; |PLX|
+	PLX
+
+TESTING $FB00	; |PLZ|
+	PLZ
+
+TESTING $FC00	; |PHW $nnnn|
+	PHW	$2000
+
+;TESTING $FD00	; |SBC $nnnn,X|
+;TESTING $FE00	; |INC $nnnn,X|
+;TESTING $FE03	; |INQ $nnnn,X| NEG_NEG_PREFIXED
+;TESTING $FF00	; |BBS7 $nn,$rr|
+;TESTING $FF01	; |BBS7 $nn,$rr| (conditional branch taken)

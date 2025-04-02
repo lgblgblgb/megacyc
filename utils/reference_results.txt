@@ -1,117 +1,126 @@
 # kibo's results (with his permission)
 # This file is used by utils/result_parser.py to check if my measure method is correct
 # Not for human consumption, only for validating the algorithm I use.
+# -------
+# TEST-ID assignment: $NNxx
+#	NN = opcode
+#	xx = "mutation":
+#		00 = no mutation
+#		01 = test for the "taken" case (for conditional branching only)
+#		02 = NOP prefixed MEGA65 opcode
+#		03 = NEG NEG prefixed MEGA65 opcode
+#		04 = NOP + NEG NEG prefixed MEGA65 opcode
 
-;ADC #$nn;2
-;ADC $nn;4
-;ADC $nnnn;5
-;ADCQ $nn;11
-;ADCQ ($nn);14
-;AND #$nn;2
-;AND $nn;4
-;AND $nnnn;5
-;AND $nn,X;4
-;AND $nnnn,X;5
-;AND $nnnn,Y;5
-;AND ($nn),Y;8
-;AND ($nn),Z;8
-;AND ($nn,X);8
-;ASL;1
-;ASL $nn;6
-;ASL $nnnn;7
-;ASLQ;4
-;ASR;1
-;ASR $nn;6
-;ASR $nn,X;6
-;ASW $nnnn;9
-;BBRx $nn,$rr;5
-;BBRx $nn,$rr;6;taken
-;BBSx $nn,$rr;5
-;BBSx $nn,$rr;6;taken
-;BCC;2
-;BCC;4;taken
-;BCS;2
-;BCS;4;taken
-;BCS;2
-;BEQ;4;taken
-;BIT #$nn;2
-;BIT $nn;4
-;BIT $nnnn;5
-;BIT $nn,X;4
-;BIT $nnnn,X;5
-;BMI;2
-;BMI;4;taken
-;BNE;2
-;BNE;4;taken
-;BPL;2
-;BPL;4;taken
-;BRA;4
-;BSR $rrrr;5
-;BVC;2
-;BVC;4;taken
-;BVS;2
-;BVS;4;taken
-;CLC;1
-;CLD;1
-;CLE;3
-;DEC $nn;6
-;DEW;8
+$6900;ADC #$nn;2
+$6500;ADC $nn;4
+$6D00;ADC $nnnn;5
+$6503;ADCQ $nn;11
+$7203;ADCQ ($nn);14
+$2900;AND #$nn;2
+$2500;AND $nn;4
+$2D00;AND $nnnn;5
+$3500;AND $nn,X;4
+$3D00;AND $nnnn,X;5
+$3900;AND $nnnn,Y;5
+$3100;AND ($nn),Y;8
+$3200;AND ($nn),Z;8
+$2100;AND ($nn,X);8
+$0A00;ASL;1
+$0600;ASL $nn;6
+$0E00;ASL $nnnn;7
+$0A03;ASLQ;4
+$4300;ASR;1
+$4400;ASR $nn;6
+$5400;ASR $nn,X;6
+$CB00;ASW $nnnn;9
+$0F00;BBRx $nn,$rr;5
+$0F01;BBRx $nn,$rr;6;taken
+$8F00;BBSx $nn,$rr;5
+$8F01;BBSx $nn,$rr;6;taken
+$9000;BCC;2
+$9001;BCC;4;taken
+$B000;BCS;2
+$B001;BCS;4;taken
+$F000;BEQ;2;
+$F001;BEQ;4;taken
+$8900;BIT #$nn;2
+$2400;BIT $nn;4
+$2C00;BIT $nnnn;5
+$3400;BIT $nn,X;4
+$3C00;BIT $nnnn,X;5
+$3000;BMI;2
+$3001;BMI;4;taken
+$D000;BNE;2
+$D001;BNE;4;taken
+$1000;BPL;2
+$1001;BPL;4;taken
+$8000;BRA;4
+$6300;BSR $rrrr;5
+$5000;BVC;2
+$5001;BVC;4;taken
+$7000;BVS;2
+$7001;BVS;4;taken
+$1800;CLC;1
+$D800;CLD;1
+$0200;CLE;3
+$C600;DEC $nn;6
+$C300;DEW;8
 $EA00;EOM;1
 $E300;INW;8
-;INC $nn;6
-;INQ;4
-;INQ $nn;11
-;INY;1
-;LDA #$nn;2
-;LDA $nn;4
-;LDA $nnnn;5
-;LDA $nn,X;4
-;LDA $nnnn,X;5
-;LDA ($nn),Y;7
-;LDA ($nn),Z;7
-;LDA ($nn,SP),Y;8
-;LDA [$nn],Z;10
-;LDQ $nn;10
-;LDQ $nnnn;11
-;LDQ [$nn],Z;16
-;LDX $nn;4
-;LDX $nnnn,Y;5
-;LDY #$nn;2
-;LDY $nn;4
+$E600;INC $nn;6
+$1A03;INQ;4
+$E603;INQ $nn;11
+$C800;INY;1
+$A900;LDA #$nn;2
+$A500;LDA $nn;4
+$AD00;LDA $nnnn;5
+$B500;LDA $nn,X;4
+$BD00;LDA $nnnn,X;5
+$B100;LDA ($nn),Y;7
+$B200;LDA ($nn),Z;7
+$E200;LDA ($nn,SP),Y;8
+$B202;LDA [$nn],Z;10
+$A503;LDQ $nn;10
+$AD03;LDQ $nnnn;11
+$B204;LDQ [$nn],Z;16
+$A600;LDX $nn;4
+$BE00;LDX $nnnn,Y;5
+$A000;LDY #$nn;2
+$A400;LDY $nn;4
 $5C00;MAP;3
-;PHA;3
-;PHP;3
-;PHX;3
-;PHY;3
-;PHZ;3
-;PHW $nnnn;9
-;PHW #$nnnn;6
-;PLA;4
-;PLP;4
-;PLX;4
-;PLY;4
-;PLZ;4
-;RMB0 $nn;6
-;ROL;1
-;ROL $nn;6
-;ROL $nnnn;7
-;ROR;1
-;ROW $nnnn;9
-;SEE;1
-;SEI;1
-;SMB0 $nn;6
-;STA $nn;3
-;STA $nnnn;4
-;STA ($nn),Y;6
-;STA ($nn),Z;6
-;STA ($nn,SP),Y;7
-;STQ $nn;9
-;STQ $nnnn;10
-;TAX;1
-;TAZ;1
-;TSX;1
-;TSY;1
-;TXA;1
-;TXS;1
-;TYA;1
-;TYS;1
+$4800;PHA;3
+$0800;PHP;3
+$DA00;PHX;3
+$5A00;PHY;3
+$DB00;PHZ;3
+$FC00;PHW $nnnn;9
+$F400;PHW #$nnnn;6
+$6800;PLA;4
+$2800;PLP;4
+$FA00;PLX;4
+$7A00;PLY;4
+$FB00;PLZ;4
+$0700;RMB0 $nn;6
+$2A00;ROL;1
+$2600;ROL $nn;6
+$2E00;ROL $nnnn;7
+$6A00;ROR;1
+$EB00;ROW $nnnn;9
+$0300;SEE;1
+$7800;SEI;1
+$8700;SMB0 $nn;6
+$8500;STA $nn;3
+$8D00;STA $nnnn;4
+$9100;STA ($nn),Y;6
+$9200;STA ($nn),Z;6
+$8200;STA ($nn,SP),Y;7
+$8503;STQ $nn;9
+$8D03;STQ $nnnn;10
+$AA00;TAX;1
+$4B00;TAZ;1
+$BA00;TSX;1
+$0B00;TSY;1
+$8A00;TXA;1
+$9A00;TXS;1
+$9800;TYA;1
+$2B00;TYS;1

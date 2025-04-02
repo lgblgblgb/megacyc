@@ -22,11 +22,12 @@
 result_ptr:		.RES 4
 source_ptr:		.RES 2
 secondary_correction:	.RES 1
-last_cycle_result:	.RES 1
 wait_for_this_frame:	.RES 1
 loop_counter:		.RES 2
+current_test_id:	.RES 2
 
-test_zp_word:		.RES 2	; 2 bytes of free-to-change ZP loc for testing
+test_zp_data4:		.RES 4	; 4 bytes of free-to-change ZP loc for testing
+test_zp_ptr:		.RES 4	; ZP pointer, can be 32 or 16 bit, initialized by the test runner, do not modify in tests!
 
 .SEGMENT "LOADADDR"
 
@@ -67,7 +68,11 @@ nextline:
 	.BYTE	$30 + .LOBYTE( run .MOD    10)
 	.BYTE	0
 nextline2:
-	.WORD	lastline, 2027
+	.WORD	nextline3, 2027
+	.BYTE	$99, ":", $99, $22, "SAVING RESULT, PLEASE STAND BY AND WAIT!", $22, ":", $99
+	.BYTE	0
+nextline3:
+	.WORD	nextline4, 2028
 	.WORD	$10FE	; "BSAVE" basic token
 	.BYTE	$22,"@RESULT,S",$22,", P($8000000) "
 	.BYTE	$A4	; "TO" basic token
@@ -82,6 +87,12 @@ nextline2:
 	.WORD	$0CFE	; "CATALOG" basic token
 	.BYTE	" U9"
 	.BYTE	$00
+nextline4:
+	.WORD	lastline, 2029
+	.BYTE	$99	; "PRINT" basic token
+	.BYTE	":",$99
+	.BYTE	$22, " *** END OF TESTS, YOU CAN PROCEED WITH PARSING ***", $22
+	.BYTE	0
 lastline:
 	.WORD	0,0
 	.BYTE	0
@@ -101,9 +112,9 @@ NMI_VECTOR = $FFFA
 TOTAL_CPU_CYCLES_PER_FRAME = 810000
 
 ; These must be 256-byte page aligned values!
-TEST_AREA	= $F000
-TEMP_ZP		= $FE00
-TEMP_STACK	= $E000
+.DEFINE	TEST_AREA	$F000
+.DEFINE	TEMP_ZP		$FE00
+.DEFINE	TEMP_STACK	$E000
 
 
 
@@ -158,10 +169,14 @@ TEMP_STACK	= $E000
 	TRB	$D011
 	; Well ... why not ...
 	INC	$D020
-	; We want to keep registers at zero, other than accu (because the timing loop itself will mess that up anyway) ...
-	LDX	#0
-	LDY	#0
-	LDZ	#0
+	; We want to keep registers at zero during the tests
+	; HOWEVER: A will be messed up (not just with the frame check below here, but at the "test loop tail" as well)
+	; So test payload can rely on X=Y=Z=0, however *NOT* on A=0!!!!
+	LDA	#0
+	TAZ
+	TAX
+	TAY
+	MAP	; dirty trick: we use MAP without EOM which will prohibit interrupts to the next EOM. Thus we can test CLI as well, without accepting IRQ (would be disaster)
 	; Finally ...
 	LDA	FRAME_COUNTER_REG
 	INA
@@ -170,6 +185,9 @@ TEMP_STACK	= $E000
 	BNE	:-
 	JMP	TEST_AREA			; give control to the test loop now!
 run_test_return:				; test loop will jump back here (note: we can't use stack with JSR/RTS as we want to test task ops as well!)
+	SEI					; be sure to disable interrupts (CLI tested?)
+	EOM					; the missing EOM with the "MAP to disable interrupts" trick ;)
+	CLD					; make sure decimal flag is cleared (maybe SED was tested?)
 	; Enable screen
 	LDA	#16
 	TSB	$D011
@@ -221,8 +239,6 @@ run_test_return:				; test loop will jump back here (note: we can't use stack wi
 	STX	secondary_correction	; restore secondary_correction back to zero - it's valid only for a single run
 soon_over:
 	; Ok, now the final result in A, huh ...
-	EOM	; CLV "protected" EOM
-	CLV
 	; About to return!
 	PLZ
 	PLY
@@ -237,7 +253,7 @@ do_calibrate:
 	; --------------------------------------------------------------------------------
 test_loop_tail:
 	INW	loop_counter	; the idea here that 16 bit should be enough for even an empty loop tested for a video frame
-	LDA	wait_for_this_frame
+	LDA	Z:wait_for_this_frame
 	CMP	FRAME_COUNTER_REG
 	test_loop_tail_beq = * + 1
 	BEQ	test_loop_tail	; this must be adjusted by the code!
@@ -290,7 +306,7 @@ test_loop_tail:
 	STA	$D030
 	LDA	#$35
 	STA	1
-	; Setting up NMI handler for emergency stop (someone tapped RESTORE?!) - it would bothers the testing!!
+	; Setting up NMI handler for emergency stop (someone tapped RESTORE?!) - it would bother the testing!!
 	LDA	#.LOBYTE(nmi_handler)
 	STA	NMI_VECTOR
 	LDA	#.HIBYTE(nmi_handler)
@@ -320,6 +336,14 @@ test_loop_tail:
 	; *** DO NOT USE OUR ZP DEFINED LOCS BEFORE THIS ***
 	LDA	#.HIBYTE(TEMP_ZP)
 	TAB
+	; Initialize "ZP" (BP) pointers
+	LDA	#.LOBYTE(test_zp_data4)
+	STA	test_zp_ptr
+	LDA	#.HIBYTE(TEMP_ZP)	; we don't use the default zero page
+	STA	test_zp_ptr+1
+	LDA	#0
+	STA	test_zp_ptr+2
+	STA	test_zp_ptr+3
 	; Now run the the full test suite
 	JSR	run_test_suite
 	; Restore the normal zero page
@@ -377,7 +401,7 @@ test_loop_tail:
 	NOP
 	STA	(result_ptr),Z
 	INW	result_ptr
-	; TODO: also send to the "hyperserial" port - not used currently
+	; TODO: also send to the "hyperserial" port - however that test data collection method is not used currently anyway
 	RTS
 .ENDPROC
 
@@ -426,7 +450,6 @@ test_loop:
 	JSR	get_test_byte		; get test-id hi byte  (--- "" ---)
 	STA	current_test_id+1
 	TYA
-	BMI	special_call		; payload>=128 -> special prepare call needed for test, current_test_id word is routine address
 	; Copy code (Y still has the number of bytes we need)
 	LDX	#0
 :	JSR	get_test_byte
@@ -437,13 +460,16 @@ test_loop:
 	; Run the opcode tester! X now contains the required payload size info
 	JSR	run_test
 	; Store the result: cycles (run_test returns that in A), then the test_id
-	STA	last_cycle_result	; used by some CALL macros later in the test-suite
+	LDX	current_test_id
+	BMI	do_secondary_correction_for_next_test	; test if test_id low-byte has negative bit set (do secondary correction test!)
 	JSR	store_test_result
-	LDA	current_test_id
+	TXA
 	JSR	store_test_result
 	LDA	current_test_id+1
 	JSR	store_test_result
-	; Continue with the next test
+	BRA	test_loop
+do_secondary_correction_for_next_test:
+	STA	secondary_correction	; if bit 7 was set, set result we got as secondary correction and do not store the result
 	BRA	test_loop
 we_are_so_done:
 	LDA	#$FF
@@ -460,55 +486,40 @@ we_are_so_done:
 	TYA
 	JSR	store_test_result
 	RTS	; end of test suite!!!!!
-special_call:
-	current_test_id = * + 1
-	JSR	$FFFF
-	BRA	test_loop
 .ENDPROC
 
 
 .SEGMENT "BSS"
 
+
 .SEGMENT "TEST"
 
+;TESTING $D202	; |CMP [$nn],Z| NOP_PREFIXED
+;TESTING $D203	; |CMPQ ($nn)| NEG_NEG_PREFIXED (no Z!)
+;TESTING $D204	; |CMPQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
 
-.MACRO	CALL	n
-	.BYTE	$FF
-	.WORD	n
+.MACRO	NOP_PREFIXED
+	NOP
 .ENDMACRO
-.MACRO	TESTING	testid,bytelen
-	.BYTE	bytelen
+.MACRO	NEG_NEG_PREFIXED
+	NEG
+	NEG
+.ENDMACRO
+
+
+
+.MACRO	TESTING	testid
+:	; closing unnamed label for the previous test
+	.BYTE	:++ - :+	; calculate the test payload length based on the unnamed labels
 	.WORD	testid
+	.ORG	TEST_AREA	; the code will be copied to TEST_AREA and executed there!
+:	; opening unnamed label for this test
 .ENDMAC
 
-.PROC	do_secondary_correction
-	LDA	last_cycle_result
-	STA	secondary_correction
-	RTS
-.ENDPROC
+test_abs_data4 = TEMP_ZP + test_zp_data4
 
 test_suite: .SCOPE
-; IMPORTANT:
-;	* Do not modify/remove comments "; --- " (unless for new tests / fixes) as those are parsed by the python script to present the result with opcodes!
-;	* TESTING opcode, byte_len signals a new opcode timing test, where "opcode" is the opcode (to be precise, the HI byte, the LO byte denotes prefixes, taken/not taken branch case etc)
-;	  "byte len" is the test payload size, then the payload follows. The payload will be executed at TEST_AREA not here, in-line!!
-;	* during testing X,Y,Z registers are initialized zero, however A is messed up!!!!!
-; --- BEGIN TEST
-; -------------  0000 BRK
-	TESTING $0000, 1	; define test, test-id is $00, 1 = number of bytes
-	BRK		; n BYTES: the tested opcode bytes, here: opcode BRK
-; -------------  4C00 JMP
-	TESTING $4C00, 3
-	JMP	TEST_AREA+3
-; -------------- 5C00 MAP
-	TESTING	$5C00, 1
-	MAP			; we can test MAP as-is, as only A register is messed up by the tester but others being zero, it won't cause problems (hopefully)
-; ---            E300 INW $nn
-	TESTING	$E300, 2
-	INW	Z:test_zp_word
-; -------------- EA00 NOP
-	TESTING $EA00, 1
-	NOP
-; --- END TEST
-	.BYTE	0	; end of tests. Do not remove this!
+dummy_label = :+	; to avoid an assembler warning about unused unnamed symbol (the very first one)
+.INCLUDE "testbench.i65"
+:	.BYTE	0	; end of tests. Do not remove this! Must be the last one.
 .ENDSCOPE

@@ -1,7 +1,55 @@
-EXT ; OPC ; ASM      ; MEGA65
- -  ;  -  ; calibration ;  22
-$00 ; $00 ; BRK      ;   9
-$00 ; $4C ; JMP      ;   5
-$00 ; $5C ; MAP      ;   3
-$00 ; $E3 ; INW  $nn ;   8
-$00 ; $EA ; NOP      ;   1
+EXT ; OPC ; ASM            ; MEGA65
+ -  ;  -  ; calibration    ;  22
+$00 ; $00 ; BRK            ;   9
+$00 ; $08 ; PHP            ;   3
+$00 ; $0A ; ASL  A         ;   1
+$03 ; $0A ; ASLQ Q         ;   4
+$00 ; $10 ; BPL  $rr       ;   2
+$01 ; $10 ; BPL  $rr       ;   4
+$00 ; $20 ; JSR  $nnnn     ;   5
+$00 ; $28 ; PLP            ;   4
+$00 ; $48 ; PHA            ;   3
+$00 ; $4C ; JMP  $nnnn     ;   5
+$00 ; $58 ; CLI            ;   3
+$00 ; $5A ; PHY            ;   3
+$00 ; $5B ; TAB            ;   1
+$00 ; $5C ; MAP            ;   3
+$00 ; $63 ; BSR  $rrrr     ;   5
+$00 ; $64 ; STZ  $nn       ;   3
+$00 ; $65 ; ADC  $nn       ;   4
+$03 ; $65 ; ADCQ $nn       ;  11
+$00 ; $68 ; PLA            ;   4
+$00 ; $69 ; ADC  #$nn      ;   2
+$00 ; $6A ; ROR  A         ;   1
+$03 ; $6A ; RORQ Q         ;   4
+$00 ; $6B ; TZA            ;   1
+$00 ; $6C ; JMP  ($nnnn)   ;   7
+$00 ; $6D ; ADC  $nnnn     ;   5
+$00 ; $78 ; SEI            ;   1
+$00 ; $7A ; PLY            ;   4
+$00 ; $7B ; TBA            ;   1
+$00 ; $7C ; JMP  ($nnnn,X) ;   7
+$00 ; $DA ; PHX            ;   3
+$00 ; $DB ; PHZ            ;   3
+$00 ; $E3 ; INW  $nn       ;   8
+$00 ; $E4 ; CPX  $nn       ;   4
+$00 ; $E5 ; SBC  $nn       ;   4
+$03 ; $E5 ; SBCQ $nn       ;  11
+$00 ; $E6 ; INC  $nn       ;   6
+$03 ; $E6 ; INQ  $nn       ;  17
+$00 ; $E8 ; INX            ;   1
+$00 ; $E9 ; SBC  #$nn      ;   2
+$00 ; $EA ; NOP            ;   1
+$00 ; $EB ; ROW  $nnnn     ;   9
+$00 ; $EC ; CPX  $nnnn     ;   5
+$00 ; $ED ; SBC  $nnnn     ;   5
+$03 ; $ED ; SBCQ $nnnn     ;  12
+$00 ; $EE ; INC  $nnnn     ;   7
+$03 ; $EE ; INQ  $nnnn     ;  18
+$00 ; $F4 ; PHW  #$nnnn    ;   6
+$00 ; $F7 ; SMB7 $nn       ;   6
+$00 ; $F8 ; SED            ;   1
+$00 ; $F9 ; SBC  $nnnn,Y   ;   5
+$00 ; $FA ; PLX            ;   4
+$00 ; $FB ; PLZ            ;   4
+$00 ; $FC ; PHW  $nnnn     ;   9

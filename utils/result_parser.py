@@ -23,31 +23,28 @@ import sys
 
 
 
-def import_asm_comments(fn : str):
+def import_asm_data(fn : str):
 
-    process, res, ln, TV_BEGIN, TV_END = False, {}, 0, ("BEGIN", "TEST"), ("END", "TEST")
+    res, ln, MAC_NAME = {}, 0, "TESTING"
     with open(fn, "rt") as f:
         for ol in f:
             l, ln = ol.strip().split(), ln + 1
-            if len(l) < 4 or l[0] != ";" or len(l[1]) < 2 or set(l[1]) != {"-"}:
+            # TESTING $0000   ; |LDA #nn| random comment
+            if len(l) < 4 or l[0] != MAC_NAME or not l[1].startswith("$") or l[2] != ";" or not l[3].startswith("|"):
+                if len(l) > 0 and l[0] == MAC_NAME:
+                    raise RuntimeError(f"Bad comment line, found '{MAC_NAME}' marker but other format error found in line {ln} of file {fn}: {ol}")
                 continue
-            tv = tuple(map(str.upper, l[2:4]))
-            if not process and tv == TV_BEGIN:
-                process = True
-            elif process and tv == TV_END:
-                process = False
-                break
-            elif process:
-                try:
-                    opc = int(l[2].lstrip("$"), 16)
-                except ValueError:
-                    raise RuntimeError(f"Bad hex comment value in line {ln} of {fn} at \"{l[2]}\": {ol}")
-                if opc in res:
-                    raise RuntimeError(f"Opcode ${opc:02X} was already defined but reused in line {ln} of {fn}: {ol}")
-                l[3] = f"{l[3]:5}"
-                res[opc] = "".join(l[3:]).rstrip()
-    if process:
-        raise RuntimeError("No proper closer comment!")
+            try:
+                opc = int(l[1].lstrip("$"), 16)
+            except ValueError:
+                raise RuntimeError(f"Bad hex value in line {ln} of file {fn} at \"{l[1]}\": {ol}")
+            if (opc & 0xFF) >= 0x80:
+                continue
+            if opc in res:
+                raise RuntimeError(f"Opcode ${opc:02X} was already defined but reused in line {ln} of file {fn}: {ol}")
+            l = " ".join(l[3:])[1:].split("|")[0].strip().split()
+            l[0] = f"{l[0]:5}"
+            res[opc] = "".join(l).rstrip()
     if len(res) == 0:
         raise RuntimeError("Empty result after parsing!")
     return res
@@ -139,7 +136,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         sys.stderr.write("Bad usage.\n")
         sys.exit(1)
-    composer(opcodes = import_asm_comments("test.a65"), res = {
+    composer(opcodes = import_asm_data("testbench.i65"), res = {
         fn.replace("\\", "/").split("/")[-1].split(".")[0].upper().replace("_", " "):
             add_reference("utils/reference_results.txt") if fn == "ref" else parse_result(fn)
         for fn in sys.argv[1:]

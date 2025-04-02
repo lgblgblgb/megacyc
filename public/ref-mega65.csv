@@ -1,4 +1,30 @@
-EXT ; OPC ; ASM      ; MEGA65 ; REF ; COMPARISON
-$00 ; $5C ; MAP      ;   3 ;   3 ; OK
-$00 ; $E3 ; INW  $nn ;   8 ;   8 ; OK
-$00 ; $EA ; NOP      ;   1 ;   1 ; OK
+EXT ; OPC ; ASM            ; MEGA65 ; REF ; COMPARISON
+$00 ; $08 ; PHP            ;   3 ;   3 ; OK
+$00 ; $0A ; ASL  A         ;   1 ;   1 ; OK
+$03 ; $0A ; ASLQ Q         ;   4 ;   4 ; OK
+$00 ; $10 ; BPL  $rr       ;   2 ;   2 ; OK
+$01 ; $10 ; BPL  $rr       ;   4 ;   4 ; OK
+$00 ; $28 ; PLP            ;   4 ;   4 ; OK
+$00 ; $48 ; PHA            ;   3 ;   3 ; OK
+$00 ; $5A ; PHY            ;   3 ;   3 ; OK
+$00 ; $5C ; MAP            ;   3 ;   3 ; OK
+$00 ; $63 ; BSR  $rrrr     ;   5 ;   5 ; OK
+$00 ; $65 ; ADC  $nn       ;   4 ;   4 ; OK
+$03 ; $65 ; ADCQ $nn       ;  11 ;  11 ; OK
+$00 ; $68 ; PLA            ;   4 ;   4 ; OK
+$00 ; $69 ; ADC  #$nn      ;   2 ;   2 ; OK
+$00 ; $6A ; ROR  A         ;   1 ;   1 ; OK
+$00 ; $6D ; ADC  $nnnn     ;   5 ;   5 ; OK
+$00 ; $78 ; SEI            ;   1 ;   1 ; OK
+$00 ; $7A ; PLY            ;   4 ;   4 ; OK
+$00 ; $DA ; PHX            ;   3 ;   3 ; OK
+$00 ; $DB ; PHZ            ;   3 ;   3 ; OK
+$00 ; $E3 ; INW  $nn       ;   8 ;   8 ; OK
+$00 ; $E6 ; INC  $nn       ;   6 ;   6 ; OK
+$03 ; $E6 ; INQ  $nn       ;  17 ;  11 ; MISMATCH
+$00 ; $EA ; NOP            ;   1 ;   1 ; OK
+$00 ; $EB ; ROW  $nnnn     ;   9 ;   9 ; OK
+$00 ; $F4 ; PHW  #$nnnn    ;   6 ;   6 ; OK
+$00 ; $FA ; PLX            ;   4 ;   4 ; OK
+$00 ; $FB ; PLZ            ;   4 ;   4 ; OK
+$00 ; $FC ; PHW  $nnnn     ;   9 ;   9 ; OK
