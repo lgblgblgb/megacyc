@@ -1,23 +1,129 @@
 EXT ; OPC ; ASM            ; MEGA65
  -  ;  -  ; calibration    ;  22
 $00 ; $00 ; BRK            ;   9
+$00 ; $01 ; ORA  ($nn,X)   ;   7
+$00 ; $02 ; CLE            ;   3
+$00 ; $03 ; SEE            ;   1
+$00 ; $04 ; TSB  $nn       ;   6
+$00 ; $05 ; ORA  $nn       ;   4
+$03 ; $05 ; ORQ  $nn       ;  11
+$00 ; $06 ; ASL  $nn       ;   6
+$03 ; $06 ; ASLQ $nn       ;  17
+$00 ; $07 ; RMB0 $nn       ;   6
 $00 ; $08 ; PHP            ;   3
+$00 ; $09 ; ORA  #$nn      ;   2
 $00 ; $0A ; ASL  A         ;   1
 $03 ; $0A ; ASLQ Q         ;   4
+$00 ; $0B ; TSY            ;   1
+$00 ; $0C ; TSB  $nnnn     ;   7
+$00 ; $0D ; ORA  $nnnn     ;   5
+$03 ; $0D ; ORQ  $nnnn     ;  12
+$00 ; $0E ; ASL  $nnnn     ;   7
+$03 ; $0E ; ASLQ $nnnn     ;  18
+$00 ; $0F ; BBR0 $nn,$rr   ;   5
+$01 ; $0F ; BBR0 $nn,$rr   ;   6
 $00 ; $10 ; BPL  $rr       ;   2
 $01 ; $10 ; BPL  $rr       ;   4
+$00 ; $14 ; TRB  $nn       ;   6
+$00 ; $15 ; ORA  $nn,X     ;   4
+$00 ; $16 ; ASL  $nn,X     ;   6
+$03 ; $16 ; ASLQ $nn,X     ;  17
+$00 ; $17 ; RMB1 $nn       ;   6
+$00 ; $18 ; CLC            ;   1
+$00 ; $19 ; ORA  $nnnn,Y   ;   5
+$00 ; $1A ; INA            ;   1
+$03 ; $1A ; INQ            ;   4
+$00 ; $1B ; INZ            ;   1
+$00 ; $1C ; TRB  $nnnn     ;   7
+$00 ; $1D ; ORA  $nnnn,X   ;   5
+$00 ; $1E ; ASL  $nnnn,X   ;   7
+$03 ; $1E ; ASLQ $nnnn,X   ;  18
+$00 ; $1F ; BBR1 $nn,$rr   ;   5
+$01 ; $1F ; BBR1 $nn,$rr   ;   6
 $00 ; $20 ; JSR  $nnnn     ;   5
+$00 ; $21 ; AND  ($nn,X)   ;   7
+$00 ; $22 ; JSR  ($nnnn)   ;   8
+$00 ; $23 ; JSR  ($nnnn,X) ;   8
+$00 ; $24 ; BIT  $nn       ;   4
+$00 ; $25 ; AND  $nn       ;   4
+$03 ; $25 ; ANDQ $nn       ;  11
+$00 ; $26 ; ROL  $nn       ;   6
+$03 ; $26 ; ROLQ $nn       ;  17
+$00 ; $27 ; RMB2 $nn       ;   6
 $00 ; $28 ; PLP            ;   4
+$00 ; $29 ; AND  #$nn      ;   2
+$00 ; $2A ; ROL  A         ;   1
+$03 ; $2A ; ROLQ Q         ;   4
+$00 ; $2B ; TYS            ;   1
+$00 ; $2C ; BIT  $nnnn     ;   5
+$03 ; $2C ; BITQ $nnnn     ;  12
+$00 ; $2D ; AND  $nnnn     ;   5
+$03 ; $2D ; ANDQ $nnnn     ;  12
+$00 ; $2E ; ROL  $nnnn     ;   7
+$03 ; $2E ; ROLQ $nnnn     ;  18
+$00 ; $2F ; BBR2 $nn,$rr   ;   5
+$01 ; $2F ; BBR2 $nn,$rr   ;   6
+$00 ; $31 ; AND  ($nn),Y   ;   7
+$00 ; $32 ; AND  ($nn),Z   ;   7
+$02 ; $32 ; AND  [$nn],Z   ;  10
+$00 ; $34 ; BIT  $nn,X     ;   4
+$00 ; $35 ; AND  $nn,X     ;   4
+$00 ; $36 ; ROL  $nn,X     ;   6
+$03 ; $36 ; ROLQ $nn,X     ;  17
+$00 ; $37 ; RMB3 $nn       ;   6
+$00 ; $38 ; SEC            ;   1
+$00 ; $39 ; AND  $nnnn,Y   ;   5
+$00 ; $3A ; DEA            ;   1
+$03 ; $3A ; DEQ            ;   4
+$00 ; $3B ; DEZ            ;   1
+$00 ; $3C ; BIT  $nnnn,X   ;   5
+$00 ; $3D ; AND  $nnnn,X   ;   5
+$00 ; $3E ; ROL  $nnnn,X   ;   7
+$03 ; $3E ; ROLQ $nnnn,X   ;  18
+$00 ; $3F ; BBR3 $nn,$rr   ;   5
+$01 ; $3F ; BBR3 $nn,$rr   ;   6
+$00 ; $41 ; EOR  ($nn,X)   ;   7
+$00 ; $42 ; NEG            ;   1
+$03 ; $42 ; NEGQ           ;   3
+$00 ; $43 ; ASR            ;   1
+$03 ; $43 ; ASRQ           ;   4
+$00 ; $44 ; ASR  $nn       ;   6
+$03 ; $44 ; ASRQ $nn       ;  17
+$00 ; $45 ; EOR  $nn       ;   4
+$03 ; $45 ; EORQ $nn       ;  11
+$00 ; $46 ; LSR  $nn       ;   6
+$03 ; $46 ; LSRQ $nn       ;  17
+$00 ; $47 ; RMB4 $nn       ;   6
 $00 ; $48 ; PHA            ;   3
+$00 ; $49 ; EOR  #$nn      ;   2
+$00 ; $4A ; LSR  A         ;   1
+$03 ; $4A ; LSRQ Q         ;   4
+$00 ; $4B ; TAZ            ;   1
 $00 ; $4C ; JMP  $nnnn     ;   5
+$00 ; $4F ; BBR4 $nn,$rr   ;   5
+$01 ; $4F ; BBR4 $nn,$rr   ;   6
+$00 ; $54 ; ASR  $nn,X     ;   6
+$03 ; $54 ; ASRQ $nn,X     ;  17
+$00 ; $55 ; EOR  $nn,X     ;   4
+$03 ; $55 ; LSRQ $nn,X     ;  17
+$00 ; $56 ; LSR  $nn,X     ;   6
+$00 ; $57 ; RMB5 $nn       ;   6
 $00 ; $58 ; CLI            ;   3
+$00 ; $59 ; EOR  $nnnn,Y   ;   5
 $00 ; $5A ; PHY            ;   3
 $00 ; $5B ; TAB            ;   1
 $00 ; $5C ; MAP            ;   3
+$00 ; $5F ; BBR5 $nn,$rr   ;   5
+$01 ; $5F ; BBR5 $nn,$rr   ;   6
+$00 ; $60 ; RTS            ;   5
+$00 ; $62 ; RTS  #$nn      ;   5
 $00 ; $63 ; BSR  $rrrr     ;   5
 $00 ; $64 ; STZ  $nn       ;   3
 $00 ; $65 ; ADC  $nn       ;   4
 $03 ; $65 ; ADCQ $nn       ;  11
+$00 ; $66 ; ROR  $nn       ;   6
+$03 ; $66 ; RORQ $nn       ;  17
+$00 ; $67 ; RMB6 $nn       ;   6
 $00 ; $68 ; PLA            ;   4
 $00 ; $69 ; ADC  #$nn      ;   2
 $00 ; $6A ; ROR  A         ;   1
@@ -25,18 +131,107 @@ $03 ; $6A ; RORQ Q         ;   4
 $00 ; $6B ; TZA            ;   1
 $00 ; $6C ; JMP  ($nnnn)   ;   7
 $00 ; $6D ; ADC  $nnnn     ;   5
+$00 ; $6F ; BBR6 $nn,$rr   ;   5
+$01 ; $6F ; BBR6 $nn,$rr   ;   6
+$00 ; $77 ; RMB7 $nn       ;   6
 $00 ; $78 ; SEI            ;   1
+$00 ; $79 ; ADC  $nnnn,Y   ;   5
 $00 ; $7A ; PLY            ;   4
 $00 ; $7B ; TBA            ;   1
 $00 ; $7C ; JMP  ($nnnn,X) ;   7
+$00 ; $7F ; BBR7 $nn,$rr   ;   5
+$01 ; $7F ; BBR7 $nn,$rr   ;   6
+$00 ; $80 ; BRA  $rr       ;   4
+$00 ; $83 ; BRA  $rrrr     ;   5
+$00 ; $84 ; STY  $nn       ;   3
+$00 ; $85 ; STA  $nn       ;   3
+$03 ; $85 ; STQ  $nn       ;   9
+$00 ; $86 ; STX  $nn       ;   3
+$00 ; $87 ; SMB0 $nn       ;   6
+$00 ; $88 ; DEY            ;   1
+$00 ; $89 ; BIT  #$nn      ;   2
+$00 ; $8A ; TXA            ;   1
+$00 ; $8B ; STY  $nnnn,X   ;   4
+$00 ; $8C ; STY  $nnnn     ;   4
+$00 ; $8D ; STA  $nnnn     ;   4
+$03 ; $8D ; STQ  $nnnn     ;  10
+$00 ; $8E ; STX  $nnnn     ;   4
+$00 ; $8F ; BBS0 $nn,$rr   ;   5
+$01 ; $8F ; BBS0 $nn,$rr   ;   6
+$00 ; $97 ; SMB1 $nn       ;   6
+$00 ; $98 ; TYA            ;   1
+$00 ; $99 ; STA  $nnnn,Y   ;   4
+$00 ; $9A ; TXS            ;   1
+$00 ; $9B ; STX  $nnnn,Y   ;   4
+$00 ; $9C ; STZ  $nnnn     ;   4
+$00 ; $9D ; STA  $nnnn,X   ;   4
+$00 ; $9E ; STZ  $nnnn,X   ;   4
+$00 ; $9F ; BBS1 $nn,$rr   ;   5
+$01 ; $9F ; BBS1 $nn,$rr   ;   6
+$00 ; $A0 ; LDY  #$nn      ;   2
+$00 ; $A2 ; LDX  #$nn      ;   2
+$00 ; $A3 ; LDZ  #$nn      ;   2
+$00 ; $A4 ; LDY  $nn       ;   4
+$00 ; $A5 ; LDA  $nn       ;   4
+$03 ; $A5 ; LDQ  $nn       ;  10
+$00 ; $A6 ; LDX  $nn       ;   4
+$00 ; $A7 ; SMB2 $nn       ;   6
+$00 ; $A8 ; TAY            ;   1
+$00 ; $A9 ; LDA  #$nn      ;   2
+$00 ; $AA ; TAX            ;   1
+$00 ; $AB ; LDZ  $nnnn     ;   5
+$00 ; $AC ; LDY  $nnnn     ;   5
+$00 ; $AD ; LDA  $nnnn     ;   5
+$03 ; $AD ; LDQ  $nnnn     ;  11
+$00 ; $AE ; LDX  $nnnn     ;   5
+$00 ; $AF ; BBS2 $nn,$rr   ;   5
+$01 ; $AF ; BBS2 $nn,$rr   ;   6
+$00 ; $B4 ; LDY  $nn,X     ;   4
+$00 ; $B5 ; LDA  $nn,X     ;   4
+$00 ; $B6 ; LDX  $nn,Y     ;   4
+$00 ; $B7 ; SMB3 $nn       ;   6
+$00 ; $B8 ; CLV            ;   1
+$00 ; $B9 ; LDA  $nnnn,Y   ;   5
+$00 ; $BA ; TSX            ;   1
+$00 ; $BB ; LDZ  $nnnn,X   ;   5
+$00 ; $BC ; LDY  $nnnn,X   ;   5
+$00 ; $BD ; LDA  $nnnn,X   ;   5
+$00 ; $BE ; LDX  $nnnn,Y   ;   5
+$00 ; $BF ; BBS3 $nn,$rr   ;   5
+$01 ; $BF ; BBS3 $nn,$rr   ;   6
+$00 ; $C0 ; CPY  #$nn      ;   2
+$00 ; $C2 ; CPZ  #$nn      ;   2
+$00 ; $C3 ; DEW  $nn       ;   8
+$00 ; $C4 ; CPY  $nn       ;   4
+$00 ; $C5 ; CMP  $nn       ;   4
+$03 ; $C5 ; CMPQ $nn       ;  11
+$00 ; $C6 ; DEC  $nn       ;   6
+$03 ; $C6 ; DEQ  $nn       ;  17
+$00 ; $C7 ; SMB4 $nn       ;   6
+$00 ; $C8 ; INY            ;   1
+$00 ; $C9 ; CMP  #$nn      ;   2
+$00 ; $CA ; DEX            ;   1
+$00 ; $CB ; ASW  $nnnn     ;   9
+$00 ; $CC ; CPY  $nnnn     ;   5
+$00 ; $CD ; CMP  $nnnn     ;   5
+$03 ; $CD ; CMPQ $nnnn     ;  12
+$00 ; $CE ; DEC  $nnnn     ;   7
+$03 ; $CE ; DEQ  $nnnn     ;  18
+$00 ; $CF ; BBS4 $nn,$rr   ;   5
+$01 ; $CF ; BBS4 $nn,$rr   ;   6
+$00 ; $D7 ; SMB5 $nn       ;   6
+$00 ; $D8 ; CLD            ;   1
 $00 ; $DA ; PHX            ;   3
 $00 ; $DB ; PHZ            ;   3
+$00 ; $DF ; BBS5 $nn,$rr   ;   5
+$01 ; $DF ; BBS5 $nn,$rr   ;   6
 $00 ; $E3 ; INW  $nn       ;   8
 $00 ; $E4 ; CPX  $nn       ;   4
 $00 ; $E5 ; SBC  $nn       ;   4
 $03 ; $E5 ; SBCQ $nn       ;  11
 $00 ; $E6 ; INC  $nn       ;   6
 $03 ; $E6 ; INQ  $nn       ;  17
+$00 ; $E7 ; SMB6 $nn       ;   6
 $00 ; $E8 ; INX            ;   1
 $00 ; $E9 ; SBC  #$nn      ;   2
 $00 ; $EA ; NOP            ;   1
@@ -46,10 +241,20 @@ $00 ; $ED ; SBC  $nnnn     ;   5
 $03 ; $ED ; SBCQ $nnnn     ;  12
 $00 ; $EE ; INC  $nnnn     ;   7
 $03 ; $EE ; INQ  $nnnn     ;  18
+$00 ; $EF ; BBS6 $nn,$rr   ;   5
+$01 ; $EF ; BBS6 $nn,$rr   ;   6
 $00 ; $F4 ; PHW  #$nnnn    ;   6
+$00 ; $F5 ; SBC  $nn,X     ;   4
+$00 ; $F6 ; INC  $nn,X     ;   6
+$03 ; $F6 ; INQ  $nn,X     ;  17
 $00 ; $F7 ; SMB7 $nn       ;   6
 $00 ; $F8 ; SED            ;   1
 $00 ; $F9 ; SBC  $nnnn,Y   ;   5
 $00 ; $FA ; PLX            ;   4
 $00 ; $FB ; PLZ            ;   4
 $00 ; $FC ; PHW  $nnnn     ;   9
+$00 ; $FD ; SBC  $nnnn,X   ;   5
+$00 ; $FE ; INC  $nnnn,X   ;   7
+$03 ; $FE ; INQ  $nnnn,X   ;  18
+$00 ; $FF ; BBS7 $nn,$rr   ;   5
+$01 ; $FF ; BBS7 $nn,$rr   ;   6

@@ -58,6 +58,7 @@ def composer(opcodes : dict, res : dict):
         r.append("COMPARISON")
     print(" | ".join(r))
     opcodes[-1] = "calibration"
+    refs = set(res[REF]) if REF in tests else set()
     for ind in sorted(opcodes):
         opbyte, ext, asm = ind >> 8, ind & 0xFF, opcodes[ind]
         if REF in tests and ind not in res[REF]:
@@ -69,6 +70,8 @@ def composer(opcodes : dict, res : dict):
             if N_A in r:
                 diag = '-'
             else:
+                if refs:
+                    refs.remove(ind)
                 diag = "OK" if len(set(r)) == 1 else "MISMATCH"
         else:
             diag = ""
@@ -76,6 +79,8 @@ def composer(opcodes : dict, res : dict):
         if diag:
             r.append(diag)
         print(" | ".join(r))
+    if refs:
+        print("Missing measurements for these references: {}".format(" ".join(map("${:04X}".format, sorted(refs)))))
 
 
 def add_reference(fn : str):

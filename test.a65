@@ -28,6 +28,8 @@ current_test_id:	.RES 2
 
 test_zp_data4:		.RES 4	; 4 bytes of free-to-change ZP loc for testing
 test_zp_ptr:		.RES 4	; ZP pointer, can be 32 or 16 bit, initialized by the test runner, do not modify in tests!
+test_zp_00:		.RES 1	; ZP data byte always zero
+test_zp_ff:		.RES 1	; ZP data byte always FF
 
 .SEGMENT "LOADADDR"
 
@@ -165,10 +167,8 @@ TOTAL_CPU_CYCLES_PER_FRAME = 810000
 	LDA	#.HIBYTE(TEST_AREA)
 	STA	IRQ_VECTOR+1
 	; Disable screen (to give less chance video generation to stop the CPU for whatever reason like bad lines?!)
-	LDA	#16
-	TRB	$D011
-	; Well ... why not ...
-	INC	$D020
+	;LDA	#16
+	;TRB	$D011
 	; We want to keep registers at zero during the tests
 	; HOWEVER: A will be messed up (not just with the frame check below here, but at the "test loop tail" as well)
 	; So test payload can rely on X=Y=Z=0, however *NOT* on A=0!!!!
@@ -189,8 +189,8 @@ run_test_return:				; test loop will jump back here (note: we can't use stack wi
 	EOM					; the missing EOM with the "MAP to disable interrupts" trick ;)
 	CLD					; make sure decimal flag is cleared (maybe SED was tested?)
 	; Enable screen
-	LDA	#16
-	TSB	$D011
+	;LDA	#16
+	;TSB	$D011
 	; Restore stack and stack pointer
 	SEE					; set 8 bit stack (if payload tested CLE before?)
 	LDY	#1
@@ -281,6 +281,9 @@ test_loop_tail:
 	STA	restore_d020
 	LDA	$D021
 	STA	restore_d021
+	; Disable screen (to give less chance video generation to stop the CPU for whatever reason like bad lines?!)
+	LDA	#16
+	TRB	$D011
 	; wait some time to be sure
 	LDA	FRAME_COUNTER_REG
 	INA
@@ -336,14 +339,6 @@ test_loop_tail:
 	; *** DO NOT USE OUR ZP DEFINED LOCS BEFORE THIS ***
 	LDA	#.HIBYTE(TEMP_ZP)
 	TAB
-	; Initialize "ZP" (BP) pointers
-	LDA	#.LOBYTE(test_zp_data4)
-	STA	test_zp_ptr
-	LDA	#.HIBYTE(TEMP_ZP)	; we don't use the default zero page
-	STA	test_zp_ptr+1
-	LDA	#0
-	STA	test_zp_ptr+2
-	STA	test_zp_ptr+3
 	; Now run the the full test suite
 	JSR	run_test_suite
 	; Restore the normal zero page
@@ -365,6 +360,9 @@ test_loop_tail:
 	; Release the "force fast gate"
 	LDA	#64
 	STA	0
+	; Enable screen
+	LDA	#16
+	TSB	$D011
 	; Pure cosmetic
 	restore_d020 = * + 1
 	LDA	#0
@@ -382,8 +380,9 @@ test_loop_tail:
 
 
 .PROC	nmi_handler
-:	INC	$D020
-	INC	$D021
+:	STA	$D020
+	STA	$D021
+	INA
 	BRA	:-
 .ENDPROC
 
@@ -417,12 +416,21 @@ test_loop_tail:
 
 
 .PROC	run_test_suite
+	; Clear the new "ZP" area
+	LDA	#0
+	TAX
+:	STA	Z:0,X
+	INX
+	BNE	:-
+	; Initialize "ZP" (BP) pointers
+	LDA	#.LOBYTE(test_zp_data4)
+	STA	test_zp_ptr
+	LDA	#.HIBYTE(TEMP_ZP)	; we don't use the default zero page
+	STA	test_zp_ptr+1
+	DEC	test_zp_ff		; test_zp_ff := $FF
 	; Result in attic-RAM (skip the two first bytes though, it will be filled at the end)
 	LDA	#2			; first two bytes will be used to store the size of the result
 	STA	result_ptr+0
-	LDA	#0
-	STA	result_ptr+1
-	STA	result_ptr+2
 	LDA	#$8
 	STA	result_ptr+3
 	; Test result identifier (3 bytes)
@@ -432,16 +440,17 @@ test_loop_tail:
 	STA	source_ptr
 	LDA	#.HIBYTE(test_suite)
 	STA	source_ptr+1
-	; Make sure to have zero secondary correction!
-	LDA	#0
-	STA	secondary_correction
 	; Calibration phase! Must be the first call of run_test
 	LDX	#0
 	JSR	run_test
 	JSR	store_test_result
 	; Now walking over the test suite and storing the result ...
 test_loop:
-	INC	$D021	; why not.
+	LDA	$D020
+	INA
+	AND	#15
+	STA	$D020
+
 	JSR	get_test_byte		; get test payload length
 	TAY
 	BEQ	we_are_so_done		; payload=0 -> end of test suite
