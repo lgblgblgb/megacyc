@@ -25,8 +25,9 @@ secondary_correction:	.RES 1
 wait_for_this_frame:	.RES 1
 loop_counter:		.RES 2
 current_test_id:	.RES 2
+palreg:			.RES 1
 
-test_zp_data4:		.RES 4	; 4 bytes of free-to-change ZP loc for testing
+test_zp_data:		.RES 4	; 4 bytes of free-to-change ZP loc for testing
 test_zp_ptr:		.RES 4	; ZP pointer, can be 32 or 16 bit, initialized by the test runner, do not modify in tests!
 test_zp_00:		.RES 1	; ZP data byte always zero
 test_zp_ff:		.RES 1	; ZP data byte always FF
@@ -166,9 +167,6 @@ TOTAL_CPU_CYCLES_PER_FRAME = 810000
 	STA	IRQ_VECTOR
 	LDA	#.HIBYTE(TEST_AREA)
 	STA	IRQ_VECTOR+1
-	; Disable screen (to give less chance video generation to stop the CPU for whatever reason like bad lines?!)
-	;LDA	#16
-	;TRB	$D011
 	; We want to keep registers at zero during the tests
 	; HOWEVER: A will be messed up (not just with the frame check below here, but at the "test loop tail" as well)
 	; So test payload can rely on X=Y=Z=0, however *NOT* on A=0!!!!
@@ -188,9 +186,6 @@ run_test_return:				; test loop will jump back here (note: we can't use stack wi
 	SEI					; be sure to disable interrupts (CLI tested?)
 	EOM					; the missing EOM with the "MAP to disable interrupts" trick ;)
 	CLD					; make sure decimal flag is cleared (maybe SED was tested?)
-	; Enable screen
-	;LDA	#16
-	;TSB	$D011
 	; Restore stack and stack pointer
 	SEE					; set 8 bit stack (if payload tested CLE before?)
 	LDY	#1
@@ -416,6 +411,8 @@ test_loop_tail:
 
 
 .PROC	run_test_suite
+	LDA	#0
+	STA	$D020
 	; Clear the new "ZP" area
 	LDA	#0
 	TAX
@@ -423,7 +420,7 @@ test_loop_tail:
 	INX
 	BNE	:-
 	; Initialize "ZP" (BP) pointers
-	LDA	#.LOBYTE(test_zp_data4)
+	LDA	#.LOBYTE(test_zp_data)
 	STA	test_zp_ptr
 	LDA	#.HIBYTE(TEMP_ZP)	; we don't use the default zero page
 	STA	test_zp_ptr+1
@@ -446,11 +443,13 @@ test_loop_tail:
 	JSR	store_test_result
 	; Now walking over the test suite and storing the result ...
 test_loop:
-	LDA	$D020
+	; some colour feedback stuff
+	LDA	palreg
 	INA
-	AND	#15
-	STA	$D020
-
+	STA	palreg
+	ORA	#$F0
+	STA	$D300
+	; extract next test
 	JSR	get_test_byte		; get test payload length
 	TAY
 	BEQ	we_are_so_done		; payload=0 -> end of test suite
@@ -478,7 +477,7 @@ test_loop:
 	JSR	store_test_result
 	BRA	test_loop
 do_secondary_correction_for_next_test:
-	STA	secondary_correction	; if bit 7 was set, set result we got as secondary correction and do not store the result
+	STA	secondary_correction	; if bit 7 (of test_id lo-byte) was set, set result we got as secondary correction and do not store the result
 	BRA	test_loop
 we_are_so_done:
 	LDA	#$FF
@@ -490,6 +489,7 @@ we_are_so_done:
 	LDZ	#0
 	STZ	result_ptr
 	STZ	result_ptr+1
+	STZ	$D300
 	TXA
 	JSR	store_test_result
 	TYA
@@ -503,20 +503,6 @@ we_are_so_done:
 
 .SEGMENT "TEST"
 
-;TESTING $D202	; |CMP [$nn],Z| NOP_PREFIXED
-;TESTING $D203	; |CMPQ ($nn)| NEG_NEG_PREFIXED (no Z!)
-;TESTING $D204	; |CMPQ [$nn]| NOP_NEG_NEG_PREFIXED (no Z!)
-
-.MACRO	NOP_PREFIXED
-	NOP
-.ENDMACRO
-.MACRO	NEG_NEG_PREFIXED
-	NEG
-	NEG
-.ENDMACRO
-
-
-
 .MACRO	TESTING	testid
 :	; closing unnamed label for the previous test
 	.BYTE	:++ - :+	; calculate the test payload length based on the unnamed labels
@@ -524,8 +510,6 @@ we_are_so_done:
 	.ORG	TEST_AREA	; the code will be copied to TEST_AREA and executed there!
 :	; opening unnamed label for this test
 .ENDMAC
-
-test_abs_data4 = TEMP_ZP + test_zp_data4
 
 test_suite: .SCOPE
 dummy_label = :+	; to avoid an assembler warning about unused unnamed symbol (the very first one)
