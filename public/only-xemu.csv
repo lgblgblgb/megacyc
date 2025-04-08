@@ -96,6 +96,7 @@ $00 ; $3E ; ROL  $nnnn,X    ;   5
 $03 ; $3E ; ROLQ $nnnn,X    ;   9
 $00 ; $3F ; BBR3 $nn,$rr    ;   4
 $01 ; $3F ; BBR3 $nn,$rr    ;   5
+$00 ; $40 ; RTI             ;  12
 $00 ; $41 ; EOR  ($nn,X)    ;   5
 $00 ; $42 ; NEG             ;   2
 $03 ; $42 ; NEGQ            ;   6

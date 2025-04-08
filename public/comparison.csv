@@ -96,6 +96,7 @@ $00 ; $3E ; ROL  $nnnn,X    ;   7 ;   5 ; MISMATCH
 $03 ; $3E ; ROLQ $nnnn,X    ;  18 ;   9 ; MISMATCH
 $00 ; $3F ; BBR3 $nn,$rr    ;   5 ;   4 ; MISMATCH
 $01 ; $3F ; BBR3 $nn,$rr    ;   6 ;   5 ; MISMATCH
+$00 ; $40 ; RTI             ;  15 ;  12 ; MISMATCH
 $00 ; $41 ; EOR  ($nn,X)    ;   7 ;   5 ; MISMATCH
 $00 ; $42 ; NEG             ;   1 ;   2 ; MISMATCH
 $03 ; $42 ; NEGQ            ;   3 ;   6 ; MISMATCH

@@ -168,7 +168,6 @@ NMI_VECTOR = $FFFA
 	TAZ
 	TAX
 	TAY
-	MAP	; dirty trick: we use MAP without EOM which will prohibit interrupts to the next EOM. Thus we can test CLI as well, without accepting IRQ (would be disaster)
 	; Finally ...
 	LDA	FRAME_COUNTER_REG
 	INA
@@ -177,8 +176,6 @@ NMI_VECTOR = $FFFA
 	BNE	:-
 	JMP	TEST_AREA			; give control to the test loop now!
 run_test_return:				; test loop will jump back here (note: we can't use stack with JSR/RTS as we want to test task ops as well!)
-	SEI					; be sure to disable interrupts (CLI tested?)
-	EOM					; the missing EOM with the "MAP to disable interrupts" trick ;)
 	CLD					; make sure decimal flag is cleared (maybe SED was tested?)
 	; Restore stack and stack pointer
 	SEE					; set 8 bit stack (if payload tested CLE before?)
@@ -212,8 +209,6 @@ test_loop_tail:
 
 
 .PROC	main
-	; Disable interrupts
-	SEI
 	; Make sure we have 40.5MHz clock, force it
 	LDA	#65
 	STA	0
@@ -222,22 +217,17 @@ test_loop_tail:
 	STA	$D02F
 	LDA	#$53
 	STA	$D02F
+	; Disable VIC interrupts
+	LDA	#0
+	STA	$D01A
+	DEA
+	STA	$D019
 	; Pure cosmetic ;)
 	LDA	$D020
 	STA	restore_d020
-	LDA	$D021
-	STA	restore_d021
 	; Disable screen (to give less chance video generation to stop the CPU for whatever reason like bad lines?!)
 	LDA	#16
 	TRB	$D011
-	; wait some time to be sure
-	LDA	FRAME_COUNTER_REG
-	INA
-	INA
-	INA
-	INA
-:	CMP	FRAME_COUNTER_REG
-	BNE	:-
 	; Save banking info
 	LDA	$D030
 	STA	restore_d030
@@ -281,6 +271,14 @@ test_loop_tail:
 	LDA	#$80
 	TSB	$DC0E
 	TSB	$DD0E
+	; wait some time to be sure
+	LDA	FRAME_COUNTER_REG
+	INA
+	INA
+	INA
+	INA
+:	CMP	FRAME_COUNTER_REG
+	BNE	:-
 	; Use our own zero page not at address zero ;)
 	; *** DO NOT USE OUR ZP DEFINED LOCS BEFORE THIS ***
 	LDA	#.HIBYTE(TEMP_ZP)
@@ -313,9 +311,10 @@ test_loop_tail:
 	restore_d020 = * + 1
 	LDA	#0
 	STA	$D020
-	restore_d021 = * + 1
-	LDA	#0
-	STA	$D021
+	; Restore VIC interrupt
+	SEI		; left for the ROM to enable!
+	LDA	#1
+	STA	$D01A
 	; ---
 	LDZ	#0	; some ROMs may not "like" is Z register is not set to zero
 	RTS	; returns to BASIC - don't enable interrupts or will crash (so MEGA65 ROM has chance to set up its MAPpings and then enable interrupts again!)
@@ -410,8 +409,10 @@ test_loop:
 	TAY
 	BEQ	we_are_so_done		; payload=0 -> end of test suite
 	JSR	get_test_byte		; get test-id low byte
+	STA	$801
 	JSR	put_result_byte
 	JSR	get_test_byte		; get test-id hi byte
+	STA	$802
 	JSR	put_result_byte
 	TYA
 	; Copy code (Y still has the number of bytes we need)

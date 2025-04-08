@@ -363,13 +363,13 @@ TESTING $3F01	; |BBR3 $nn,$rr| (conditional branch taken)
 	BBR3	test_zp_00, :+
 
 ; TODO: this seems to be unstable on MEGA65 - works on Xemu though.
-;TESTING $40FF	; |RTI| - extra stuff
-;	PHP
-;	PHW	#PHW_FOR_RTI(:+)
-;TESTING $4000	; |RTI|
-;	PHP
-;	PHW	#PHW_FOR_RTI(:+)
-;	RTI
+TESTING $40FF	; |RTI| - extra stuff
+	PHP
+	PHW	#PHW_FOR_RTI(:+)
+TESTING $4000	; |RTI|
+	PHP
+	PHW	#PHW_FOR_RTI(:+)
+	RTI
 
 TESTING $4100	; |EOR ($nn,X)|
 	EOR	(test_zp_ptr,X)
