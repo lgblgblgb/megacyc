@@ -132,8 +132,8 @@ $01 ; $53 ; LBVC $rrrr      ;   5
 $00 ; $54 ; ASR  $nn,X      ;   6
 $03 ; $54 ; ASRQ $nn,X      ;  17
 $00 ; $55 ; EOR  $nn,X      ;   4
-$03 ; $55 ; LSRQ $nn,X      ;  17
 $00 ; $56 ; LSR  $nn,X      ;   6
+$03 ; $56 ; LSRQ $nn,X      ;  17
 $00 ; $57 ; RMB5 $nn        ;   6
 $00 ; $58 ; CLI             ;   3
 $00 ; $59 ; EOR  $nnnn,Y    ;   5

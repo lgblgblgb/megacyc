@@ -73,7 +73,7 @@ QOPCODES = (
     None,  None,  None,  None, "BITQ","ANDQ","ROLQ", None,   None,  None, "ROLQ", None, "BITQ","ANDQ","ROLQ", None, # 2x
     None,  None, "ANDQ", None,  None,  None, "ROLQ", None,   None,  None, "DEQ",  None,  None,  None, "ROLQ", None, # 3x
     None,  None, "NEGQ","ASRQ","ASRQ","EORQ","LSRQ", None,   None,  None, "LSRQ", None,  None, "EORQ","LSRQ", None, # 4x
-    None,  None, "EORQ", None, "ASRQ","LSRQ", None,  None,   None,  None,  None,  None,  None,  None, "LSRQ", None, # 5x
+    None,  None, "EORQ", None, "ASRQ", None, "LSRQ", None,   None,  None,  None,  None,  None,  None, "LSRQ", None, # 5x
     None,  None,  None,  None,  None, "ADCQ","RORQ", None,   None,  None, "RORQ", None,  None, "ADCQ","RORQ", None, # 6x
     None,  None, "ADCQ", None,  None,  None, "RORQ", None,   None,  None,  None,  None,  None,  None, "RORQ", None, # 7x
     None,  None,  None,  None,  None, "STQ",  None,  None,   None,  None,  None,  None,  None, "STQ",  None,  None, # 8x
