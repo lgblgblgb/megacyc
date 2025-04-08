@@ -118,21 +118,35 @@ def parse_result(fn : str):
     print(f"\t(encoded length: {l})")
     result = result[a + len(ID_STR):]
     print(f"\t(stream length: {len(result)})")
-    parsed = {-1: int(result[0])}
-    print(f"\t(measure loop cycle count: {result[0]})")
-    result = result[1:]
+    parsed, tail_cost, pre_cost  = {}, 0, 0
     while True:
-        if len(result) < 1:
-            raise RuntimeError("Unexpected end of the result stream (cyc)")
-        cycles, result = int(result[0]), result[1:]
-        if cycles == 0xFF:
+        if len(result) < 4:
+            raise RuntimeError("Unexpected end of the result stream")
+        testid, loopcnt, result = result[0] + (result[1] << 8), result[2] + (result[3] << 8), result[4:]
+        if testid == 0xFFFF and loopcnt == 0xFFFF:
             break
-        if len(result) < 2:
-            raise RuntimeError("Unexpected end of the result stream (id)")
-        testid, result = result[0] + (result[1] << 8), result[2:]
-        print(f"TEST ${testid:04X} result is {cycles}")
-        parsed[testid] = cycles
+        cyc_float = 810000.0 / loopcnt - tail_cost - pre_cost
+        cyc = round(cyc_float)
+        print(f"TEST ${testid:04X} result is {cyc} ({cyc_float} - {loopcnt})")
+        if cyc < 1:
+            raise RuntimeError(f"Impossible cycle count got: {cyc}")
+        if tail_cost == 0:
+            tail_cost = cyc
+            print(f"\t(measure loop cycle count: {tail_cost})")
+            if tail_cost < 16:
+                raise RuntimeError(f"Impossible tail_cost: {tail_cost}")
+        else:
+            if (testid & 0xFF) >= 0x80:
+                if pre_cost:
+                    raise RuntimeError(f"More than one correction entires in a row at testid ${testid:04X}")
+                pre_cost = cyc
+            else:
+                pre_cost = 0
+                if testid in parsed:
+                    raise RuntimeError(f"More than one result for testid ${testid:04X}")
+                parsed[testid] = cyc
     print(f"\t(remaining stream ({len(result)} bytes): {result})")
+    parsed[-1] = tail_cost
     return parsed
 
 
