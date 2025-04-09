@@ -96,7 +96,7 @@ $00 ; $3E ; ROL  $nnnn,X    ;   7
 $03 ; $3E ; ROLQ $nnnn,X    ;  18
 $00 ; $3F ; BBR3 $nn,$rr    ;   5
 $01 ; $3F ; BBR3 $nn,$rr    ;   6
-$00 ; $40 ; RTI             ;  15
+$00 ; $40 ; RTI             ;   6
 $00 ; $41 ; EOR  ($nn,X)    ;   7
 $00 ; $42 ; NEG             ;   1
 $03 ; $42 ; NEGQ            ;   3
@@ -194,7 +194,7 @@ $00 ; $7F ; BBR7 $nn,$rr    ;   5
 $01 ; $7F ; BBR7 $nn,$rr    ;   6
 $00 ; $80 ; BRA  $rr        ;   4
 $00 ; $81 ; STA  ($nn,X)    ;   6
-$00 ; $82 ; STA  ($nn,SP),Y ;  42
+$00 ; $82 ; STA  ($nn,SP),Y ;  44
 $00 ; $83 ; LBRA $rrrr      ;   5
 $00 ; $84 ; STY  $nn        ;   3
 $00 ; $85 ; STA  $nn        ;   3

@@ -362,13 +362,12 @@ TESTING $3F00	; |BBR3 $nn,$rr|
 TESTING $3F01	; |BBR3 $nn,$rr| (conditional branch taken)
 	BBR3	test_zp_00, :+
 
-; TODO: this seems to be unstable on MEGA65 - works on Xemu though.
 TESTING $40FF	; |RTI| - extra stuff
-	PHP
 	PHW	#PHW_FOR_RTI(:+)
+	PHP
 TESTING $4000	; |RTI|
-	PHP
 	PHW	#PHW_FOR_RTI(:+)
+	PHP
 	RTI
 
 TESTING $4100	; |EOR ($nn,X)|
@@ -713,12 +712,10 @@ TESTING $8100	; |STA ($nn,X)|
 
 TESTING $82FF	; |STA ($nn,SP),Y| - extra stuff
 	PHW	#$0008
-	LDA	#1
 	PLA
 	PLA
 TESTING $8200	; |STA ($nn,SP),Y|
 	PHW	#$0008		; test_abs_data	- FIXME
-	LDA	#1
 	STA	(1,SP),Y
 	PLA			; !!! if removed, MEGA65 crashes ...
 	PLA

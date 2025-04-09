@@ -96,7 +96,7 @@ $00 ; $3E ; ROL  $nnnn,X    ;   7 ;   5 ; MISMATCH
 $03 ; $3E ; ROLQ $nnnn,X    ;  18 ;   9 ; MISMATCH
 $00 ; $3F ; BBR3 $nn,$rr    ;   5 ;   4 ; MISMATCH
 $01 ; $3F ; BBR3 $nn,$rr    ;   6 ;   5 ; MISMATCH
-$00 ; $40 ; RTI             ;  15 ;  12 ; MISMATCH
+$00 ; $40 ; RTI             ;   6 ;   5 ; MISMATCH
 $00 ; $41 ; EOR  ($nn,X)    ;   7 ;   5 ; MISMATCH
 $00 ; $42 ; NEG             ;   1 ;   2 ; MISMATCH
 $03 ; $42 ; NEGQ            ;   3 ;   6 ; MISMATCH
@@ -194,7 +194,7 @@ $00 ; $7F ; BBR7 $nn,$rr    ;   5 ;   4 ; MISMATCH
 $01 ; $7F ; BBR7 $nn,$rr    ;   6 ;   5 ; MISMATCH
 $00 ; $80 ; BRA  $rr        ;   4 ;   3 ; MISMATCH
 $00 ; $81 ; STA  ($nn,X)    ;   6 ;   5 ; MISMATCH
-$00 ; $82 ; STA  ($nn,SP),Y ;  42 ;   6 ; MISMATCH
+$00 ; $82 ; STA  ($nn,SP),Y ;  44 ;   6 ; MISMATCH
 $00 ; $83 ; LBRA $rrrr      ;   5 ;   4 ; MISMATCH
 $00 ; $84 ; STY  $nn        ;   3 ;   3 ; OK
 $00 ; $85 ; STA  $nn        ;   3 ;   3 ; OK

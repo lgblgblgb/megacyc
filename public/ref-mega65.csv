@@ -56,7 +56,7 @@ $03 ; $72 ; ADCQ ($nn)      ;  14 ;  14 ; OK
 $00 ; $78 ; SEI             ;   1 ;   1 ; OK
 $00 ; $7A ; PLY             ;   4 ;   4 ; OK
 $00 ; $80 ; BRA  $rr        ;   4 ;   4 ; OK
-$00 ; $82 ; STA  ($nn,SP),Y ;  42 ;   7 ; MISMATCH
+$00 ; $82 ; STA  ($nn,SP),Y ;  44 ;   7 ; MISMATCH
 $00 ; $85 ; STA  $nn        ;   3 ;   3 ; OK
 $03 ; $85 ; STQ  $nn        ;   9 ;   9 ; OK
 $00 ; $87 ; SMB0 $nn        ;   6 ;   6 ; OK
