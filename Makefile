@@ -16,7 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 CL65	= cl65
-XEMU	= xemu-xmega65
+#XEMU	= xemu-xmega65
+XEMU	= /home/lgb/prog_here/xemu-next/build/bin/xmega65.native
 M65ETHL	= mega65_etherload
 M65FTP  = mega65_ftp
 C1541	= c1541
@@ -69,16 +70,19 @@ $(MRESULT): $(MDISK)
 parse:
 	utils/result_parser.py $(XRESULT) $(MRESULT) | tee result/comparison.txt
 	sed -n 's/|/;/pg' result/comparison.txt > result/comparison.csv
+	sed -n 's/|/\t/pg' result/comparison.txt > result/comparison.tsv
 
 refparse:
 	utils/result_parser.py $(MRESULT) ref | tee result/ref-mega65.txt
 	sed -n 's/|/;/pg' result/ref-mega65.txt > result/ref-mega65.csv
+	sed -n 's/|/\t/pg' result/ref-mega65.txt > result/ref-mega65.tsv
 
 xemutest:
 	rm -f $(XDISK) $(XRESULT)
 	$(MAKE) $(XRESULT)
 	utils/result_parser.py $(XRESULT) | tee result/only-xemu.txt
 	sed -n 's/|/;/pg' result/only-xemu.txt > result/only-xemu.csv
+	sed -n 's/|/\t/pg' result/only-xemu.txt > result/only-xemu.tsv
 
 megatest:
 	rm -f $(MDISK) $(MRESULT)
@@ -86,7 +90,9 @@ megatest:
 	utils/result_parser.py $(MRESULT) ref | tee result/ref-mega65.txt
 	utils/result_parser.py $(MRESULT) | tee result/only-mega65.txt
 	sed -n 's/|/;/pg' result/only-mega65.txt > result/only-mega65.csv
+	sed -n 's/|/\t/pg' result/only-mega65.txt > result/only-mega65.tsv
 	sed -n 's/|/;/pg' result/ref-mega65.txt > result/ref-mega65.csv
+	sed -n 's/|/\t/pg' result/ref-mega65.txt > result/ref-mega65.tsv
 
 fulltest:
 	$(MAKE) xemutest
@@ -96,12 +102,15 @@ fulltest:
 publish:
 	cp $(PRG) public/test.prg
 	cp result/comparison.csv result/only-xemu.csv result/only-mega65.csv public/
+	cp result/comparison.tsv result/only-xemu.tsv result/only-mega65.tsv public/
 	cp result/ref-mega65.csv public/
+	cp result/ref-mega65.tsv public/
 
 clean:
 	rm -f $(PRG) $(LST) $(MAP) $(OBJ) $(XDISK) $(XRESULT) $(MDISK) $(MRESULT)
 	rm -f result/comparison.txt result/only-xemu.txt result/only-mega65.txt
 	rm -f result/comparison.csv result/only-xemu.csv result/only-mega65.csv
-	rm -f result/ref-mega65.txt result/ref-mega65.csv
+	rm -f result/comparison.tsv result/only-xemu.tsv result/only-mega65.tsv
+	rm -f result/ref-mega65.txt result/ref-mega65.csv result/ref-mega65.tsv
 
 .PHONY: all xemu mega65 clean publish parse fulltest xemutest megatest refparse

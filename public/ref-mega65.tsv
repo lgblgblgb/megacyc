@@ -1,0 +1,114 @@
+EXT 	 OPC 	 ASM             	 MEGA65 	 REF 	 COMPARISON
+$00 	 $02 	 CLE             	   3 	   3 	 OK
+$00 	 $03 	 SEE             	   1 	   1 	 OK
+$00 	 $06 	 ASL  $nn        	   6 	   6 	 OK
+$00 	 $07 	 RMB0 $nn        	   6 	   6 	 OK
+$00 	 $08 	 PHP             	   3 	   3 	 OK
+$00 	 $0A 	 ASL  A          	   1 	   1 	 OK
+$03 	 $0A 	 ASLQ Q          	   4 	   4 	 OK
+$00 	 $0B 	 TSY             	   1 	   1 	 OK
+$00 	 $0E 	 ASL  $nnnn      	   7 	   7 	 OK
+$00 	 $0F 	 BBR0 $nn,$rr    	   5 	   5 	 OK
+$01 	 $0F 	 BBR0 $nn,$rr    	   6 	   6 	 OK
+$00 	 $10 	 BPL  $rr        	   2 	   2 	 OK
+$01 	 $10 	 BPL  $rr        	   4 	   4 	 OK
+$00 	 $18 	 CLC             	   1 	   1 	 OK
+$03 	 $1A 	 INQ             	   4 	   4 	 OK
+$00 	 $21 	 AND  ($nn,X)    	   7 	   8 	 MISMATCH
+$00 	 $24 	 BIT  $nn        	   4 	   4 	 OK
+$00 	 $25 	 AND  $nn        	   4 	   4 	 OK
+$00 	 $26 	 ROL  $nn        	   6 	   6 	 OK
+$00 	 $28 	 PLP             	   4 	   4 	 OK
+$00 	 $29 	 AND  #$nn       	   2 	   2 	 OK
+$00 	 $2A 	 ROL  A          	   1 	   1 	 OK
+$00 	 $2B 	 TYS             	   1 	   1 	 OK
+$00 	 $2C 	 BIT  $nnnn      	   5 	   5 	 OK
+$00 	 $2D 	 AND  $nnnn      	   5 	   5 	 OK
+$00 	 $2E 	 ROL  $nnnn      	   7 	   7 	 OK
+$00 	 $30 	 BMI  $rr        	   2 	   2 	 OK
+$01 	 $30 	 BMI  $rr        	   4 	   4 	 OK
+$00 	 $31 	 AND  ($nn),Y    	   7 	   8 	 MISMATCH
+$00 	 $32 	 AND  ($nn),Z    	   7 	   8 	 MISMATCH
+$00 	 $34 	 BIT  $nn,X      	   4 	   4 	 OK
+$00 	 $35 	 AND  $nn,X      	   4 	   4 	 OK
+$00 	 $39 	 AND  $nnnn,Y    	   5 	   5 	 OK
+$00 	 $3C 	 BIT  $nnnn,X    	   5 	   5 	 OK
+$00 	 $3D 	 AND  $nnnn,X    	   5 	   5 	 OK
+$00 	 $43 	 ASR             	   1 	   1 	 OK
+$00 	 $44 	 ASR  $nn        	   6 	   6 	 OK
+$00 	 $48 	 PHA             	   3 	   3 	 OK
+$00 	 $4B 	 TAZ             	   1 	   1 	 OK
+$00 	 $50 	 BVC  $rr        	   2 	   2 	 OK
+$01 	 $50 	 BVC  $rr        	   4 	   4 	 OK
+$00 	 $54 	 ASR  $nn,X      	   6 	   6 	 OK
+$00 	 $5A 	 PHY             	   3 	   3 	 OK
+$00 	 $5C 	 MAP             	   3 	   3 	 OK
+$00 	 $63 	 BSR  $rrrr      	   5 	   5 	 OK
+$00 	 $65 	 ADC  $nn        	   4 	   4 	 OK
+$03 	 $65 	 ADCQ $nn        	  11 	  11 	 OK
+$00 	 $68 	 PLA             	   4 	   4 	 OK
+$00 	 $69 	 ADC  #$nn       	   2 	   2 	 OK
+$00 	 $6A 	 ROR  A          	   1 	   1 	 OK
+$00 	 $6D 	 ADC  $nnnn      	   5 	   5 	 OK
+$00 	 $70 	 BVS  $rr        	   2 	   2 	 OK
+$01 	 $70 	 BVS  $rr        	   4 	   4 	 OK
+$03 	 $72 	 ADCQ ($nn)      	  14 	  14 	 OK
+$00 	 $78 	 SEI             	   1 	   1 	 OK
+$00 	 $7A 	 PLY             	   4 	   4 	 OK
+$00 	 $80 	 BRA  $rr        	   4 	   4 	 OK
+$00 	 $82 	 STA  ($nn,SP),Y 	  44 	   7 	 MISMATCH
+$00 	 $85 	 STA  $nn        	   3 	   3 	 OK
+$03 	 $85 	 STQ  $nn        	   9 	   9 	 OK
+$00 	 $87 	 SMB0 $nn        	   6 	   6 	 OK
+$00 	 $89 	 BIT  #$nn       	   2 	   2 	 OK
+$00 	 $8A 	 TXA             	   1 	   1 	 OK
+$00 	 $8D 	 STA  $nnnn      	   4 	   4 	 OK
+$03 	 $8D 	 STQ  $nnnn      	  10 	  10 	 OK
+$00 	 $8F 	 BBS0 $nn,$rr    	   5 	   5 	 OK
+$01 	 $8F 	 BBS0 $nn,$rr    	   6 	   6 	 OK
+$00 	 $90 	 BCC  $rr        	   2 	   2 	 OK
+$01 	 $90 	 BCC  $rr        	   4 	   4 	 OK
+$00 	 $91 	 STA  ($nn),Y    	   6 	   6 	 OK
+$00 	 $92 	 STA  ($nn),Z    	   6 	   6 	 OK
+$00 	 $98 	 TYA             	   1 	   1 	 OK
+$00 	 $9A 	 TXS             	   1 	   1 	 OK
+$00 	 $A0 	 LDY  #$nn       	   2 	   2 	 OK
+$00 	 $A4 	 LDY  $nn        	   4 	   4 	 OK
+$00 	 $A5 	 LDA  $nn        	   4 	   4 	 OK
+$03 	 $A5 	 LDQ  $nn        	  10 	  10 	 OK
+$00 	 $A6 	 LDX  $nn        	   4 	   4 	 OK
+$00 	 $A9 	 LDA  #$nn       	   2 	   2 	 OK
+$00 	 $AA 	 TAX             	   1 	   1 	 OK
+$00 	 $AD 	 LDA  $nnnn      	   5 	   5 	 OK
+$03 	 $AD 	 LDQ  $nnnn      	  11 	  11 	 OK
+$00 	 $B0 	 BCS  $rr        	   2 	   2 	 OK
+$01 	 $B0 	 BCS  $rr        	   4 	   4 	 OK
+$00 	 $B1 	 LDA  ($nn),Y    	   7 	   7 	 OK
+$00 	 $B2 	 LDA  ($nn),Z    	   7 	   7 	 OK
+$02 	 $B2 	 LDA  [$nn],Z    	  13 	  10 	 MISMATCH
+$04 	 $B2 	 LDQ  [$nn],Z    	  16 	  16 	 OK
+$00 	 $B5 	 LDA  $nn,X      	   4 	   4 	 OK
+$00 	 $BA 	 TSX             	   1 	   1 	 OK
+$00 	 $BD 	 LDA  $nnnn,X    	   5 	   5 	 OK
+$00 	 $BE 	 LDX  $nnnn,Y    	   5 	   5 	 OK
+$00 	 $C3 	 DEW  $nn        	   8 	   8 	 OK
+$00 	 $C6 	 DEC  $nn        	   6 	   6 	 OK
+$00 	 $C8 	 INY             	   1 	   1 	 OK
+$00 	 $CB 	 ASW  $nnnn      	   9 	   9 	 OK
+$00 	 $D0 	 BNE  $rr        	   2 	   2 	 OK
+$01 	 $D0 	 BNE  $rr        	   4 	   4 	 OK
+$00 	 $D8 	 CLD             	   1 	   1 	 OK
+$00 	 $DA 	 PHX             	   3 	   3 	 OK
+$00 	 $DB 	 PHZ             	   3 	   3 	 OK
+$00 	 $E2 	 LDA  ($nn,SP),Y 	  58 	   8 	 MISMATCH
+$00 	 $E3 	 INW  $nn        	   8 	   8 	 OK
+$00 	 $E6 	 INC  $nn        	   6 	   6 	 OK
+$03 	 $E6 	 INQ  $nn        	  17 	  17 	 OK
+$00 	 $EA 	 NOP             	   1 	   1 	 OK
+$00 	 $EB 	 ROW  $nnnn      	   9 	   9 	 OK
+$00 	 $F0 	 BEQ  $rr        	   2 	   2 	 OK
+$01 	 $F0 	 BEQ  $rr        	   4 	   4 	 OK
+$00 	 $F4 	 PHW  #$nnnn     	   6 	   6 	 OK
+$00 	 $FA 	 PLX             	   4 	   4 	 OK
+$00 	 $FB 	 PLZ             	   4 	   4 	 OK
+$00 	 $FC 	 PHW  $nnnn      	   9 	   9 	 OK
