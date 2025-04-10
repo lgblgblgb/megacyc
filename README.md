@@ -81,3 +81,20 @@ opcodes before. I use these results (with his permission) to have a "ref" (refen
 public/ref-mega65.txt (csv file is also available there)
 
 This should have the very same result with my measurements, ie "OK" for all tests.
+
+## Results so far ... and the problems
+
+All opcodes are tested. The results so far are:
+
+* [Xemu vs MEGA65 (after Xemu fixes)](public/comparison.tsv)
+* [MEGA65-only results](public/only-mega65.tsv)
+* [Xemu-only results](public/only-xemu.tsv)
+* [My results vs Kibo's results](public/ref-mega65.tsv)
+
+Please note, that I have several strange results and suspects. It seems (for me! I can be wrong!) the cycles needed to execute
+a sequence of opcodes is not always the same as the sum of the cycles of those opcodes :( It seems there is some strange inter-opcode
+state when one opcode modifies the execution time of an other. One extreme example is the SP relative addressing mode, I have results
+like 40 and 50 cycles instead of the proposed 7-8. It seems however (according to the VHDL) that this addressing mode does a very
+serious "wizardy" with various cache operations, so it's possible that the opcode really takes eg 7-8 cycles, but then there is a stall on the
+next opcode, or whatever. I still don't fully understand these behaviours, to be honest. The SP-relative opcodes maybe just the extreme
+case, but one cycle difference can be seen with other opcodes as well here and there.
